@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProBeans Total Scores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E6EBF6; --panel:#fff; --ink:#18214A; --muted:#6A7396; --line:#D9DFEF; --soft:#F5F7FD;
+  --accent:#3B4CCA; --orange:#F2762E; --wr:#3DFF8A; --wr-ink:#3DFF8A; --wr-bg:#0A0F0B; --warn-bg:#FFF4CC;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif; font-size:14px; line-height:1.5}
+button{font:inherit; color:inherit; cursor:pointer}
+.page{max-width:1400px; margin:0 auto; padding:26px 16px 60px}
+h1{margin:0; font-size:clamp(26px,4.5vw,38px); font-weight:900}
+.sub{margin:4px 0 0; color:var(--muted)}
+.status{margin:12px 0 0; font-size:13px; display:none; padding:4px 12px; border-radius:8px}
+.status.warn{display:inline-block; color:#9A5B00; background:var(--warn-bg)}
+.status.err{display:inline-block; color:#A3122A; background:#FDE4E8}
+
+.tabs{display:flex; gap:4px; margin:22px 0 16px; background:#dde3f3; padding:4px; border-radius:999px; width:max-content; max-width:100%; margin-inline:auto}
+.tabs button{border:0; background:transparent; padding:8px 20px; border-radius:999px; font-weight:700; color:var(--muted); white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--ink); color:#fff}
+
+.tools{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-bottom:14px}
+input,select{font:inherit; color:var(--ink); background:var(--panel); border:2px solid var(--line); border-radius:999px; padding:8px 16px; outline:none; min-width:0}
+input:focus,select:focus{border-color:var(--accent)}
+.tools input{flex:1 1 200px; max-width:320px}
+.hint{color:var(--muted); font-size:13px}
+.hint b{color:var(--ink)}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* ---- 総合ランキング (カード並び) ---- */
+.lhead{display:none}
+.list{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr)); gap:10px; align-items:start}
+.row,.wrow{
+  display:grid; grid-template-columns:36px minmax(0,1fr) auto;
+  grid-template-areas:"rk nm tot" "rk gap tot" "fp fp fp" "tm tm tm";
+  column-gap:10px; row-gap:2px; align-items:center;
+  border-radius:14px; padding:12px 14px; width:100%; text-align:left;
+}
+.row{background:var(--panel); border:2px solid #DCE2F1}
+.row:hover{border-color:var(--accent)}
+.wrow{grid-column:1/-1; background:var(--wr-bg); border:2px solid var(--wr); color:var(--wr-ink)}
+.rk{grid-area:rk; font-weight:900; font-size:22px; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums}
+.wrow .rk{color:var(--wr); font-size:17px}
+.r1{background:#FFF6D1}.r2{background:#ECEFF8}.r3{background:#FAE8DA}
+.r1 .rk{color:#B88A00}.r2 .rk{color:#6F789A}.r3 .rk{color:#B0612F}
+.nmwrap{grid-area:nm; display:flex; align-items:center; gap:6px; min-width:0}
+.nm{font-weight:700; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.gap{grid-area:gap; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
+.gap::before{content:var(--gap-label)}
+.wrow .gap::before{content:""}
+.tot{grid-area:tot; text-align:right; font-weight:900; font-size:20px; font-variant-numeric:tabular-nums}
+.wrow .tot{color:var(--wr-ink)}
+.fp{grid-area:fp; display:grid; grid-template-columns:repeat(27,1fr); gap:2px; height:14px; margin-top:8px}
+.fp i{border-radius:3px; background:#E3E7F3}
+.wfp{display:none}
+.top{position:relative; text-align:center}
+.lang{position:absolute; right:0; top:0}
+.lang>button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:7px 14px; font-weight:700; font-size:13px; white-space:nowrap}
+.lang>button:hover{border-color:var(--accent)}
+.menu{position:absolute; right:0; top:calc(100% + 6px); background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:4px; min-width:150px; z-index:20; box-shadow:0 8px 24px rgba(24,33,74,.15)}
+.menu button{display:block; width:100%; text-align:left; border:0; background:transparent; padding:8px 12px; border-radius:10px; font-weight:700}
+.menu button:hover{background:var(--soft)}
+.menu button[aria-checked=true]::after{content:" ✓"; color:var(--accent)}
+.tgl{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:7px 16px; font-size:13px; font-weight:700}
+.tgl[aria-pressed=true]{background:var(--ink); border-color:var(--ink); color:#fff}
+.times{grid-area:tm; display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:3px; margin-top:8px}
+.wrow .times{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.tc{display:flex; flex-direction:column; padding:3px 6px; border-radius:7px; box-shadow:inset 0 0 0 1px rgba(16,23,51,.08); line-height:1.25; font-variant-numeric:tabular-nums; background:#E3E7F3; min-width:0}
+.tc small{font-size:10px; font-weight:700; color:rgba(16,23,51,.72); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tc b{font-size:13px; font-weight:900; color:#101733}
+.tc.none{background:#F3F5FA}.tc.none b{color:#B5BBD3}
+.tc.w{background:var(--wr-bg)}.tc.w small{color:var(--wr); opacity:.75}.tc.w b{color:var(--wr); font-weight:900}
+.tv .fp{display:none}
+.legend{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); font-weight:700}
+.legend span{display:inline-flex; gap:2px}
+.legend i{width:16px; height:12px; border-radius:3px}
+#v-maps,#v-cmp{max-width:860px; margin-inline:auto}
+.more{margin:14px auto 0; display:block; border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:9px 26px; font-weight:700}
+.more:hover{border-color:var(--accent)}
+.empty{padding:40px; text-align:center; color:var(--muted)}
+
+.badge{display:inline-block; min-width:36px; padding:1px 9px; border-radius:999px; font-size:12px; font-weight:900; color:#fff; text-align:center}
+.k-S{background:#E0457B}.k-A{background:#F2762E}.k-B{background:#3B8AE0}.k-C{background:#2FA37A}.k-D{background:#7C6BC9}.k-E{background:#8A93B2}.k-x{background:#B5BBD3}
+
+/* ---- マップ別 ---- */
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px}
+.chips button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:5px 13px; font-size:13px; font-weight:700}
+.chips button[aria-pressed=true]{background:var(--accent); border-color:var(--accent); color:#fff}
+.card{background:var(--panel); border-radius:16px; padding:8px 8px}
+.mrow{display:grid; grid-template-columns:40px minmax(0,1fr) 84px 76px; gap:10px; align-items:center; width:100%; text-align:left; border:0; background:transparent; padding:8px 10px; border-radius:10px; position:relative}
+button.mrow:hover{background:var(--soft)}
+.mrow .bar{position:absolute; left:0; bottom:0; height:3px; background:var(--accent); opacity:.25; border-radius:3px}
+.mrow .n{font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.mrow .t{font-weight:900; text-align:right; font-variant-numeric:tabular-nums}
+.mrow .g{color:var(--muted); font-size:12px; text-align:right; font-variant-numeric:tabular-nums}
+.mrow .k{text-align:center; color:var(--muted); font-weight:700}
+.mrow.wr{background:var(--wr-bg); margin-bottom:6px; color:var(--wr-ink)}
+.mrow.wr .k{color:var(--wr-ink); font-weight:900}
+
+/* ---- 比較 ---- */
+.pick{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px}
+.pick label{display:block; font-size:12px; font-weight:700; margin:0 0 4px 6px}
+.pick .a label{color:var(--accent)} .pick .b label{color:var(--orange)}
+.pick input{width:100%}
+.pick .a input{border-color:#C8CEF1} .pick .b input{border-color:#F7CBB0}
+.vs{display:flex; justify-content:space-between; gap:12px; font-weight:900; font-size:18px; padding:6px 12px 2px}
+.vs .a{color:var(--accent)} .vs .b{color:var(--orange); text-align:right}
+.vs small{display:block; font-size:12px; font-weight:500; color:var(--muted)}
+.crow{display:grid; grid-template-columns:70px 1fr 70px; gap:8px; align-items:center; padding:5px 10px; font-size:13px; font-variant-numeric:tabular-nums}
+.crow .ta{text-align:right} .crow .tb{text-align:left}
+.crow .w{font-weight:900}
+.axis{position:relative; height:22px; display:flex; align-items:center; justify-content:center}
+.axis::before{content:""; position:absolute; left:50%; top:2px; bottom:2px; width:2px; background:var(--line)}
+.axis .mn{position:relative; z-index:1; background:var(--panel); padding:0 6px; font-size:11px; color:var(--muted); white-space:nowrap}
+.axis .fa,.axis .fb{position:absolute; top:5px; height:12px; border-radius:6px}
+.axis .fa{right:50%; background:var(--accent)} .axis .fb{left:50%; background:var(--orange)}
+.crow.m .mapname{grid-column:1/4; text-align:center; font-size:12px; font-weight:700; color:var(--muted); padding-top:6px}
+
+/* ---- プレイヤー詳細 ---- */
+dialog{border:0; padding:0; border-radius:20px; width:min(560px,94vw); max-height:88vh; background:var(--panel); color:var(--ink)}
+dialog::backdrop{background:rgba(24,33,74,.45)}
+.dh{position:sticky; top:0; background:var(--panel); padding:18px 20px 12px; border-bottom:1px solid var(--line); z-index:1}
+.dh h2{margin:0; font-size:22px; font-weight:900; padding-right:40px; overflow-wrap:anywhere}
+.dh .meta{margin:4px 0 0; color:var(--muted); font-size:13px}
+.dh .meta b{color:var(--ink)}
+.x{position:absolute; right:12px; top:12px; width:34px; height:34px; border-radius:50%; border:0; background:var(--soft); font-size:18px; font-weight:700}
+.dact{display:flex; gap:8px; margin-top:12px}
+.dact button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:5px 14px; font-weight:700; font-size:13px}
+.dact button:hover{border-color:var(--accent)}
+.db{padding:6px 12px 16px}
+.db h3{margin:12px 8px 4px; font-size:13px; color:var(--muted); font-weight:700}
+.drow{display:grid; grid-template-columns:minmax(0,1fr) 74px 64px; gap:8px; align-items:center; padding:6px 8px; position:relative}
+.drow .mn{font-weight:700; font-size:13px}
+.drow .mn small{display:block; font-weight:500; color:var(--muted); font-size:11px}
+.drow .t{text-align:right; font-weight:900; font-variant-numeric:tabular-nums}
+.drow .g{text-align:right; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.wrtag{display:inline-block; background:var(--wr-bg); color:var(--wr); border-radius:999px; padding:1px 9px; font-size:12px; font-weight:900; white-space:nowrap; flex:none}
+.drow.iswr{background:var(--wr-bg); color:var(--wr); border-radius:10px; margin-bottom:4px}
+.drow.iswr .mn small,.drow.iswr .g{color:var(--wr)}
+.wrlist{margin:4px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.drow .gb{position:absolute; left:8px; bottom:0; height:3px; border-radius:3px; background:var(--orange); opacity:.55}
+
+@media (max-width:700px){
+  .lang{position:static; text-align:right; margin-bottom:8px}
+  .top{display:flex; flex-direction:column-reverse}
+  .mrow{grid-template-columns:34px minmax(0,1fr) 72px}
+  .mrow .g{display:none}
+  .pick{grid-template-columns:1fr}
+  .crow{grid-template-columns:58px 1fr 58px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div>
+      <h1>ProBeans Total Scores</h1>
+      <p class="sub" data-i18n="sub"></p>
+    </div>
+    <div class="lang">
+      <button id="langbtn" aria-haspopup="menu" aria-expanded="false">🌐 <span id="langcur">English</span> ▾</button>
+      <div class="menu" id="langmenu" role="menu" hidden>
+        <button role="menuitemradio" data-l="en">English</button>
+        <button role="menuitemradio" data-l="ja">日本語</button>
+      </div>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-overall" aria-selected="true" data-i18n="tab_overall"></button>
+    <button role="tab" id="t-maps" aria-selected="false" data-i18n="tab_maps"></button>
+    <button role="tab" id="t-cmp" aria-selected="false" data-i18n="tab_cmp"></button>
+  </div>
+
+  <section id="v-overall" class="tv">
+    <div class="tools">
+      <input id="q" type="search" data-i18n-ph="search" data-i18n-aria="search">
+      <select id="cls" data-i18n-aria="cls_label"><option value=""></option></select>
+      <button class="tgl" id="tgl" aria-pressed="true" data-i18n="toggle"></button>
+      <span class="legend" id="legend"><span data-i18n="fast"></span><span id="lgs"></span><span data-i18n="slow"></span></span>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="list" id="list"><div class="empty" data-i18n="loading"></div></div>
+    <button class="more" id="more" hidden data-i18n="more"></button>
+  </section>
+
+  <section id="v-maps" hidden>
+    <div class="chips" id="chips"></div>
+    <div class="card" id="maplist"></div>
+  </section>
+
+  <section id="v-cmp" hidden>
+    <div class="pick">
+      <div class="a"><label for="ca" data-i18n="pa"></label><input id="ca" list="names" data-i18n-ph="enter_name" autocomplete="off"></div>
+      <div class="b"><label for="cb" data-i18n="pb"></label><input id="cb" list="names" data-i18n-ph="enter_name" autocomplete="off"></div>
+    </div>
+    <datalist id="names"></datalist>
+    <div class="card" id="cmpout"></div>
+  </section>
+</div>
+
+<dialog id="dlg"></dialog>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxJunGL8SSr1lI6Cb4DezG9q98l-Lt2EbFoZjIrwlZa2imRKseKqkiaJ3JCzKhqv2BL-w/exec';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => (Math.round(n * 1000) / 1000).toFixed(3);
+const sgn = n => (n >= 0 ? '+' : '−') + fmt(Math.abs(n));
+const EPS = 0.0005;
+
+/* ---- 言語 (標準は英語) ---- */
+const I18N = {
+  en: {
+    sub: 'Total-time ranking across all 27 LOLBeans maps',
+    tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
+    search: 'Search players', cls_label: 'Class', all_classes: 'All classes',
+    toggle: 'Show every map time', fast: 'Fast', slow: 'Slow', loading: 'Loading…', more: 'Show more',
+    pa: 'Player A', pb: 'Player B', enter_name: 'Enter a name',
+    cmp_empty: 'Pick two players to compare their times map by map',
+    err: 'Failed to load data: ', no_players: 'No players found',
+    players: n => `${n} player${n === 1 ? '' : 's'}`,
+    wr_name: 'World record', gap_label: '"vs WR total "', no_data: 'No data', no_map_times: 'No times for this map',
+    cmp_faster: n => `faster on ${n} map${n === 1 ? '' : 's'}`, total: 'Total', total_diff: 'Total difference', even: 'Even',
+    faster_by: (name, s) => `${name} is ${s}s faster`, apart: s => `${s}s apart`,
+    close: 'Close', overall: 'Overall', rank_ord: n => `#${n}`, wr_gap: 'vs WR total',
+    wr_hold_n: n => `Holds ${n} WR${n === 1 ? '' : 's'}`,
+    biggest_gap: (m, g) => `Biggest gap to WR: <b>${m}</b> (${g})`,
+    cmp_btn: 'Compare with this player',
+    sec_wr: 'WR maps', sec_gap: 'Biggest gaps to WR (room to improve)', sec_best: 'Best rankings by map', sec_missing: 'Times not submitted',
+    map_rank: (r, n) => `Rank ${r} of ${n}`, rank_short: r => `#${r}`
+  },
+  ja: {
+    sub: 'LOLBeans 全27マップの合計タイムランキング',
+    tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
+    search: 'プレイヤー名で検索', cls_label: 'クラス', all_classes: '全クラス',
+    toggle: '全マップのタイムを表示', fast: '速い', slow: '遅い', loading: '読み込み中…', more: 'もっと見る',
+    pa: 'プレイヤーA', pb: 'プレイヤーB', enter_name: '名前を入力',
+    cmp_empty: '2人の名前を選ぶと、マップごとの差が見られます',
+    err: 'データの取得に失敗しました: ', no_players: '該当するプレイヤーがいません',
+    players: n => `${n}人`,
+    wr_name: '世界記録', gap_label: '"WR合計比 "', no_data: 'データがありません', no_map_times: 'このマップのタイムがありません',
+    cmp_faster: n => `${n}マップで速い`, total: '合計', total_diff: '合計差', even: '同じ',
+    faster_by: (name, s) => `${name} が ${s} 秒速い`, apart: s => `${s}秒差`,
+    close: '閉じる', overall: '総合', rank_ord: n => `${n}位`, wr_gap: 'WR合計比',
+    wr_hold_n: n => `WR保持 ${n}マップ`,
+    biggest_gap: (m, g) => `WRとの差がいちばん大きいのは <b>${m}</b> (${g})`,
+    cmp_btn: 'この人と比較する',
+    sec_wr: 'WR保持マップ', sec_gap: 'WRとの差が大きい順 (伸びしろ)', sec_best: 'マップ内順位が高い順', sec_missing: 'タイム未登録',
+    map_rank: (r, n) => `マップ内 ${r}位 / ${n}人`, rank_short: r => `${r}位`
+  }
+};
+let LANG = 'en', ERR = null;
+try { const s = localStorage.getItem('lang'); if (s === 'en' || s === 'ja') LANG = s; } catch (e) {}
+const T = (k, ...a) => { const v = I18N[LANG][k]; return typeof v === 'function' ? v(...a) : v; };
+
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.documentElement.style.setProperty('--gap-label', T('gap_label'));
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = T(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
+  $('langcur').textContent = LANG === 'ja' ? '日本語' : 'English';
+  document.querySelectorAll('#langmenu [data-l]').forEach(b => b.setAttribute('aria-checked', b.dataset.l === LANG));
+  if (ERR) $('status').textContent = T('err') + ERR;
+  const opt = $('cls').options[0]; if (opt) opt.textContent = T('all_classes');
+}
+function applyLang() {
+  applyStatic();
+  if (!DB) return;
+  buildClassSelect();
+  renderOverall(); renderMap(); renderCompare();
+}
+function buildClassSelect() {
+  const sel = $('cls');
+  sel.innerHTML = `<option value="">${esc(T('all_classes'))}</option>` +
+    [...new Set(players.map(p => p.class).filter(Boolean))].sort((a, b) => clsOrder(a) - clsOrder(b))
+      .map(c => `<option>${esc(c)}</option>`).join('');
+  sel.value = S.cls;
+}
+
+let DB, maps, wr, players, sorted = {}, N = {};
+const S = { q: '', cls: '', limit: 48, map: null, times: true };
+
+async function load() {
+  const st = $('status');
+  try {
+    const res = await fetch(API_URL);
+    DB = await res.json();
+    if (DB.error) throw new Error(DB.error);
+  } catch (e) {
+    DB = { data: [], courseNames: [], wrData: null };
+    st.className = 'status err';
+    ERR = e.message;
+    st.textContent = T('err') + ERR;
+  }
+  maps = DB.courseNames; wr = DB.wrData;
+  players = DB.data.slice().sort((a, b) => a.score - b.score);
+  players.forEach((p, i) => p.rank = i + 1);
+  players.forEach(p => p.wrs = wr ? maps.filter(m => p.courses[m] != null && wr.courses[m] != null && Math.abs(p.courses[m] - wr.courses[m]) < EPS) : []);
+
+  maps.forEach(m => {
+    sorted[m] = players.filter(p => p.courses[m] != null).map(p => p.courses[m]).sort((a, b) => a - b);
+    N[m] = sorted[m].length;
+  });
+  S.map = maps[0] || null;
+
+  $('names').innerHTML = players.map(p => `<option value="${esc(p.name)}">`).join('');
+  $('chips').innerHTML = maps.map(m => `<button data-m="${esc(m)}" aria-pressed="false">${esc(m)}</button>`).join('');
+
+  applyLang();
+}
+
+/* ---- 共通ヘルパー ---- */
+const clsKey = c => { const k = String(c).trim().charAt(0).toUpperCase(); return k && 'SABCDE'.includes(k) ? 'k-' + k : 'k-x'; };
+const clsOrder = c => { const s = String(c).trim(); return Math.max('SABCDE'.indexOf(s.charAt(0)), 0) * 10 + (s.endsWith('+') ? 0 : s.endsWith('-') ? 2 : 1) - (s.startsWith('S++') ? 1 : 0); };
+const badge = c => c ? `<span class="badge ${clsKey(c)}">${esc(c)}</span>` : '';
+// マップ内順位 (同タイムは同順位)
+function mapRank(m, t) {
+  const a = sorted[m]; let lo = 0, hi = a.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; a[mid] < t - 1e-9 ? lo = mid + 1 : hi = mid; }
+  return lo + 1;
+}
+// マップ内順位の割合(0=最速〜1=最遅)を7段階の色に
+const HEAT = ['#3FD27F', '#9BE9A8', '#CDF0A0', '#FBEB8E', '#FFCF8F', '#FFA9A3', '#F77B83'];
+const HEAT_CUT = [0.05, 0.2, 0.4, 0.6, 0.8, 0.95];
+function heatSoft(m, t) {
+  const n = N[m]; if (n < 2) return '#E3E7F3';
+  const p = (mapRank(m, t) - 1) / (n - 1);
+  let i = 0; while (i < HEAT_CUT.length && p > HEAT_CUT[i]) i++;
+  return HEAT[i];
+}
+document.getElementById('lgs').innerHTML = HEAT.map(c => `<i style="background:${c}"></i>`).join('');
+function timeGrid(p) {
+  return '<span class="times">' + maps.map(m => {
+    const t = p.courses[m];
+    if (t == null) return `<span class="tc none"><small>${esc(m)}</small><b>–</b></span>`;
+    const w = wr && wr.courses[m] != null && Math.abs(t - wr.courses[m]) < EPS;
+    return `<span class="tc${w ? ' w' : ''}" title="${esc(m)}"${w ? '' : ` style="background:${heatSoft(m, t)}"`}><small>${esc(m)}</small><b>${fmt(t)}</b></span>`;
+  }).join('') + '</span>';
+}
+function wrTimeGrid() {
+  return '<span class="times">' + maps.filter(m => wr.courses[m] != null).map(m =>
+    `<span class="tc w"><small>${esc(m)}</small><b>${fmt(wr.courses[m])}</b></span>`).join('') + '</span>';
+}
+function heat(m, t) { return heatSoft(m, t); }
+
+/* ---- 総合ランキング ---- */
+function renderOverall() {
+  const q = S.q.trim().toLowerCase();
+  const rows = players.filter(p => (!q || p.name.toLowerCase().includes(q)) && (!S.cls || p.class === S.cls));
+  const shown = rows.slice(0, S.limit);
+  const wrRow = wr ? `<div class="wrow"><span class="rk">WR</span><span class="nmwrap"><span class="nm">${esc(T('wr_name'))}</span>${badge(wr.class)}</span><span class="wfp"></span><span class="gap"></span><span class="tot">${fmt(wr.score)}</span>${S.times ? wrTimeGrid() : ''}</div>` : '';
+  $('list').innerHTML = wrRow + (shown.length ? shown.map(p => {
+    const fp = maps.map(m => p.courses[m] != null
+      ? `<i style="background:${heat(m, p.courses[m])}" title="${esc(m)} ${fmt(p.courses[m])}"></i>` : '<i></i>').join('');
+    return `<button class="row r${p.rank}" data-r="${p.rank}">
+      <span class="rk">${p.rank}</span><span class="nmwrap"><span class="nm">${esc(p.name)}</span>${badge(p.class)}${p.wrs.length ? `<span class="wrtag">WR×${p.wrs.length}</span>` : ''}</span>
+      <span class="fp">${fp}</span>
+      <span class="gap">${wr ? sgn(p.score - wr.score) : ''}</span>
+      <span class="tot">${fmt(p.score)}</span>${S.times ? timeGrid(p) : ''}</button>`;
+  }).join('') : `<div class="empty">${esc(T('no_players'))}</div>`);
+  $('more').hidden = rows.length <= S.limit;
+  $('hint').textContent = T('players', rows.length);
+}
+
+/* ---- マップ別 ---- */
+function renderMap() {
+  const m = S.map;
+  if (!m) { $('maplist').innerHTML = `<div class="empty">${esc(T('no_data'))}</div>`; return; }
+  document.querySelectorAll('#chips button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
+  const list = players.filter(p => p.courses[m] != null).sort((a, b) => a.courses[m] - b.courses[m]).slice(0, 30);
+  const wt = wr ? wr.courses[m] : null;
+  const base = wt != null ? wt : (list[0] ? list[0].courses[m] : 0);
+  const span = list.length ? Math.max(list[list.length - 1].courses[m] - base, 0.001) : 1;
+  let html = wt != null ? `<div class="mrow wr"><span class="k">WR</span><span class="n">${esc(T('wr_name'))}</span><span class="t">${fmt(wt)}</span><span class="g"></span></div>` : '';
+  let prev = null, rk = 0;
+  html += list.map((p, i) => {
+    const t = p.courses[m];
+    if (prev === null || t > prev + 1e-9) rk = i + 1; prev = t;
+    const w = Math.min(100, ((t - base) / span) * 100);
+    return `<button class="mrow" data-r="${p.rank}"><span class="k">${rk}</span><span class="n">${esc(p.name)}${wt != null && Math.abs(t - wt) < EPS ? ' <span class="wrtag">WR</span>' : ''}</span>` +
+      `<span class="t">${fmt(t)}</span><span class="g">${wt != null ? sgn(t - wt) : ''}</span>` +
+      `<span class="bar" style="width:${w.toFixed(1)}%"></span></button>`;
+  }).join('');
+  $('maplist').innerHTML = html || `<div class="empty">${esc(T('no_map_times'))}</div>`;
+}
+
+/* ---- 2人比較 ---- */
+const byName = n => players.find(p => p.name.toLowerCase() === n.trim().toLowerCase());
+function renderCompare() {
+  const A = byName($('ca').value), B = byName($('cb').value), out = $('cmpout');
+  if (!A || !B) { out.innerHTML = `<div class="empty">${esc(T('cmp_empty'))}</div>`; return; }
+  const diffs = maps.map(m => {
+    const a = A.courses[m], b = B.courses[m];
+    return { m, a, b, d: (a != null && b != null) ? a - b : null };
+  });
+  const maxAbs = Math.max(0.001, ...diffs.filter(x => x.d != null).map(x => Math.abs(x.d)));
+  const aw = diffs.filter(x => x.d != null && x.d < -EPS).length;
+  const bw = diffs.filter(x => x.d != null && x.d > EPS).length;
+  const tot = A.score - B.score;
+  let html = `<div class="vs"><div class="a">${esc(A.name)}<small>${T('cmp_faster', aw)} · ${T('total')} ${fmt(A.score)}</small></div>
+    <div class="b">${esc(B.name)}<small>${T('cmp_faster', bw)} · ${T('total')} ${fmt(B.score)}</small></div></div>
+    <div class="vs" style="justify-content:center;font-size:13px;color:var(--muted);font-weight:700">${T('total_diff')}: ${tot === 0 ? T('even') : T('faster_by', esc(tot < 0 ? A.name : B.name), fmt(Math.abs(tot)))}</div>`;
+  html += diffs.map(x => {
+    const w = x.d != null ? Math.abs(x.d) / maxAbs * 50 : 0;
+    const aWin = x.d != null && x.d < -EPS, bWin = x.d != null && x.d > EPS;
+    return `<div class="crow m"><div class="mapname">${esc(x.m)}${x.d != null ? ' (' + T('apart', fmt(Math.abs(x.d))) + ')' : ''}</div></div>
+      <div class="crow"><span class="ta ${aWin ? 'w' : ''}">${x.a != null ? fmt(x.a) : '–'}</span>
+      <div class="axis">${aWin ? `<span class="fa" style="width:${w}%"></span>` : ''}${bWin ? `<span class="fb" style="width:${w}%"></span>` : ''}</div>
+      <span class="tb ${bWin ? 'w' : ''}">${x.b != null ? fmt(x.b) : '–'}</span></div>`;
+  }).join('');
+  out.innerHTML = html;
+}
+
+/* ---- プレイヤー詳細 ---- */
+function openPlayer(rank) {
+  const p = players[rank - 1]; if (!p) return;
+  const items = maps.filter(m => p.courses[m] != null).map(m => {
+    const t = p.courses[m], w = wr ? wr.courses[m] : null;
+    return { m, t, w, g: w != null ? t - w : null, r: mapRank(m, t) };
+  });
+  const holds = items.filter(x => x.g != null && x.g < EPS);
+  const withGap = items.filter(x => x.g != null && x.g >= EPS).sort((a, b) => b.g - a.g);
+  const maxG = Math.max(0.001, ...withGap.map(x => x.g));
+  const best = items.filter(x => !(x.g != null && x.g < EPS)).sort((a, b) => a.r / N[a.m] - b.r / N[b.m]).slice(0, 3);
+  const missing = maps.filter(m => p.courses[m] == null);
+  const top = withGap[0];
+
+  const rk = x => `<small>${esc(T('map_rank', x.r, N[x.m]))}</small>`;
+  $('dlg').innerHTML = `
+    <div class="dh"><button class="x" data-close aria-label="${esc(T('close'))}">×</button>
+      <h2>${esc(p.name)} ${badge(p.class)}</h2>
+      <p class="meta">${T('overall')} <b>${T('rank_ord', p.rank)}</b> · ${T('total')} <b>${fmt(p.score)}</b>${wr ? ' · ' + T('wr_gap') + ' <b>' + sgn(p.score - wr.score) + '</b>' : ''}</p>
+      ${holds.length ? `<div class="wrlist"><span class="wrtag">${T('wr_hold_n', holds.length)}</span>${holds.map(x => `<span class="wrtag">${esc(x.m)}</span>`).join('')}</div>` : ''}
+      ${top ? `<p class="meta">${T('biggest_gap', esc(top.m), sgn(top.g))}</p>` : ''}
+      <div class="dact"><button data-cmp="${esc(p.name)}">${T('cmp_btn')}</button></div></div>
+    <div class="db">
+      ${holds.length ? `<h3>${T('sec_wr')}</h3>` + holds.map(x => `<div class="drow iswr"><div class="mn">${esc(x.m)}${rk(x)}</div>
+        <span class="t">${fmt(x.t)}</span><span class="g">WR</span></div>`).join('') : ''}
+      ${withGap.length ? `<h3>${T('sec_gap')}</h3>` + withGap.map(x => `<div class="drow"><div class="mn">${esc(x.m)}${rk(x)}</div>
+        <span class="t">${fmt(x.t)}</span><span class="g">${sgn(x.g)}</span>
+        <span class="gb" style="width:${(x.g / maxG * 100).toFixed(1)}%"></span></div>`).join('') : ''}
+      ${best.length ? `<h3>${T('sec_best')}</h3>` + best.map(x => `<div class="drow"><div class="mn">${esc(x.m)}</div><span class="t">${fmt(x.t)}</span><span class="g">${T('rank_short', x.r)}</span></div>`).join('') : ''}
+      ${missing.length ? `<h3>${T('sec_missing')}</h3><div class="drow"><div class="mn">${missing.map(esc).join(' / ')}</div></div>` : ''}
+    </div>`;
+  const d = $('dlg'); if (!d.open) d.showModal(); d.scrollTop = 0;
+}
+
+/* ---- イベント ---- */
+function showTab(id) {
+  ['overall', 'maps', 'cmp'].forEach(t => {
+    $('v-' + t).hidden = t !== id;
+    $('t-' + t).setAttribute('aria-selected', t === id);
+  });
+}
+$('t-overall').onclick = () => showTab('overall');
+$('t-maps').onclick = () => showTab('maps');
+$('t-cmp').onclick = () => showTab('cmp');
+
+$('q').oninput = e => { S.q = e.target.value; S.limit = 48; renderOverall(); };
+$('cls').onchange = e => { S.cls = e.target.value; S.limit = 48; renderOverall(); };
+$('tgl').onclick = () => {
+  S.times = !S.times;
+  $('tgl').setAttribute('aria-pressed', S.times);
+  $('v-overall').classList.toggle('tv', S.times);
+  renderOverall();
+};
+$('more').onclick = () => { S.limit += 48; renderOverall(); };
+$('list').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
+$('maplist').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
+$('chips').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { S.map = b.dataset.m; renderMap(); } };
+$('ca').oninput = renderCompare; $('cb').oninput = renderCompare;
+$('dlg').onclick = e => {
+  if (e.target === $('dlg') || e.target.closest('[data-close]')) return $('dlg').close();
+  const c = e.target.closest('[data-cmp]');
+  if (c) {
+    $('ca').value = c.dataset.cmp; $('cb').value = ''; $('dlg').close();
+    showTab('cmp'); renderCompare(); $('cb').focus();
+  }
+};
+
+$('langbtn').onclick = e => {
+  e.stopPropagation();
+  const open = $('langmenu').hidden;
+  $('langmenu').hidden = !open;
+  $('langbtn').setAttribute('aria-expanded', open);
+};
+$('langmenu').onclick = e => {
+  const b = e.target.closest('[data-l]'); if (!b) return;
+  LANG = b.dataset.l;
+  try { localStorage.setItem('lang', LANG); } catch (err) {}
+  $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false');
+  applyLang();
+};
+document.addEventListener('click', () => { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); } });
+
+applyStatic();
+load();
+</script>
+</body>
+</html>
