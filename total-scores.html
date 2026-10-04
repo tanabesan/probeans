@@ -36,6 +36,7 @@ h1{margin:0; font-family:var(--f-disp); font-weight:700; font-size:clamp(38px,7v
 h1 mark{background:none; color:var(--accent); font-weight:500}
 .sub{margin:14px 0 0; font-size:clamp(13px,1.8vw,15px); color:var(--muted); letter-spacing:.02em}
 .status{margin:16px 0 0; font-size:13px; display:none; padding:6px 14px; border-radius:6px}
+.status .retry{margin-left:10px; border:1px solid currentColor; background:transparent; border-radius:5px; padding:2px 10px; font-weight:600; font-size:12px; color:inherit}
 .status.warn{display:inline-block; background:var(--warn-bg); color:#7A5A00}
 .status.err{display:inline-block; background:#FDE3E1; color:#A3201A}
 
@@ -463,6 +464,8 @@ const I18N = {
   en: {
     sub: 'Total-time ranking across all 27 LOLBeans maps',
     sus_tag: 'Unverified', sus_note: 'Some times on this map are faster than the world record. They may be unverified or falsified, so please treat them with caution. World records must be verified.',
+    err_bad: 'The server returned a web page instead of data. Please try again in a moment.', retry: 'Retry',
+    stale: t => `Could not fetch the latest data, so the copy saved on ${t} is shown.`,
     menu: 'Menu', menu_theme: 'Appearance', menu_lang: 'Language', theme_light_name: 'Light', theme_dark_name: 'Dark',
     tab_about: 'About',
     tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
@@ -488,6 +491,8 @@ const I18N = {
   ja: {
     sub: 'LOLBeans 全27マップの合計タイムランキング',
     sus_tag: '未検証', sus_note: 'このマップには、世界記録より速いタイムがあります。未検証、または偽造の可能性があるため、ご注意ください。世界記録はすべて検証が必要です。',
+    err_bad: 'サーバーからデータではなくWebページが返されました。少し待ってから、もう一度お試しください。', retry: '再読み込み',
+    stale: t => `最新のデータを取得できなかったため、${t} に保存したデータを表示しています。`,
     menu: 'メニュー', menu_theme: '表示モード', menu_lang: '言語', theme_light_name: 'ライト', theme_dark_name: 'ダーク',
     tab_about: 'このサイトについて',
     tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
@@ -518,6 +523,20 @@ const T = (k, ...a) => { const v = I18N[LANG][k]; return typeof v === 'function'
 function updateThemeBtn() {
   const cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
   document.querySelectorAll('#themeopts [data-t]').forEach(b => b.setAttribute('aria-checked', b.dataset.t === cur));
+}
+let STALE = null;
+function renderStatus() {
+  const st = $('status');
+  if (STALE) {
+    st.className = 'status warn';
+    st.textContent = T('stale', new Date(STALE).toLocaleString(LANG === 'ja' ? 'ja-JP' : 'en-US'));
+  } else if (ERR) {
+    st.className = 'status err';
+    st.innerHTML = esc(T('err') + (ERR === 'BAD_RESPONSE' ? T('err_bad') : ERR)) + ` <button class="retry" id="retry" type="button">${esc(T('retry'))}</button>`;
+    $('retry').onclick = () => { ERR = null; renderStatus(); $('list').innerHTML = `<div class="empty">${esc(T('loading'))}</div>`; load(); };
+  } else {
+    st.className = 'status'; st.textContent = '';
+  }
 }
 function updateLegend() {
   const tb = S.view === 'table';
@@ -597,7 +616,7 @@ function applyStatic() {
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = T(el.dataset.i18nPh));
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
   document.querySelectorAll('#langopts [data-l]').forEach(b => b.setAttribute('aria-checked', b.dataset.l === LANG));
-  if (ERR) $('status').textContent = T('err') + ERR;
+  renderStatus();
   const opt = $('cls').options[0]; if (opt) opt.textContent = T('all_classes');
   updateLegend();
   updateThemeBtn();
@@ -621,18 +640,38 @@ const S = { q: '', cls: '', limit: 48, map: null, times: true, view: 'cards', so
 const PER_PAGE = 50;
 let CAP = 0.2, CAP_T = 0.1; // WRとの差(割合)がこの値以上で赤
 
+const CACHE_KEY = 'probeans_cache_v1';
+async function fetchDB() {
+  const res = await fetch(API_URL, { cache: 'no-store' });
+  const txt = await res.text();
+  let j;
+  try { j = JSON.parse(txt); } catch (e) { throw new Error('BAD_RESPONSE'); } // HTMLが返ってきた場合など
+  if (j && j.error) throw new Error(j.error);
+  if (!j || !Array.isArray(j.data) || !Array.isArray(j.courseNames)) throw new Error('BAD_RESPONSE');
+  return j;
+}
 async function load() {
-  const st = $('status');
-  try {
-    const res = await fetch(API_URL);
-    DB = await res.json();
-    if (DB.error) throw new Error(DB.error);
-  } catch (e) {
-    DB = { data: [], courseNames: [], wrData: null };
-    st.className = 'status err';
-    ERR = e.message;
-    st.textContent = T('err') + ERR;
+  ERR = null; STALE = null;
+  let lastErr = null, ok = false;
+  // 一時的な失敗に備えて最大3回試す
+  for (let i = 0; i < 3 && !ok; i++) {
+    try { DB = await fetchDB(); ok = true; }
+    catch (e) { lastErr = e; if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i + 1))); }
   }
+  if (ok) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), db: DB })); } catch (e) {}
+  } else {
+    // 前回取得できたデータが保存されていれば、それを表示する
+    let c = null;
+    try { c = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (e) {}
+    if (c && c.db && Array.isArray(c.db.data) && c.db.data.length) {
+      DB = c.db; STALE = c.t;
+    } else {
+      DB = { data: [], courseNames: [], wrData: null };
+      ERR = lastErr ? lastErr.message : 'unknown';
+    }
+  }
+  renderStatus();
   maps = DB.courseNames; wr = DB.wrData;
   players = DB.data.slice().sort((a, b) => a.score - b.score);
   players.forEach((p, i) => p.rank = i + 1);
