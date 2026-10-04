@@ -26,6 +26,9 @@ button{font:inherit; color:inherit; cursor:pointer}
 
 /* ---- ヘッダー ---- */
 .top{position:relative; text-align:center}
+.top{padding:64px 20px 44px; border-radius:14px; background:
+  linear-gradient(color-mix(in srgb,var(--bg) 62%,transparent),color-mix(in srgb,var(--bg) 78%,transparent)),
+  url("https://tanabesan.github.io/probeans/ui/probeans.webp") center/cover no-repeat, var(--soft)}
 h1{margin:0; font-family:var(--f-disp); font-weight:700; font-size:clamp(38px,7vw,68px); line-height:1; letter-spacing:.02em; text-transform:uppercase}
 h1 mark{background:none; color:var(--accent); font-weight:500}
 .sub{margin:14px 0 0; font-size:clamp(13px,1.8vw,15px); color:var(--muted); letter-spacing:.02em}
@@ -33,17 +36,32 @@ h1 mark{background:none; color:var(--accent); font-weight:500}
 .status.warn{display:inline-block; background:var(--warn-bg); color:#7A5A00}
 .status.err{display:inline-block; background:#FDE3E1; color:#A3201A}
 
-.lang{position:absolute; right:0; top:-34px; z-index:30; display:flex; gap:8px; align-items:flex-start}
-.lang>button{border:1px solid var(--line-strong); background:#fff; border-radius:6px; padding:6px 12px; font-weight:500; font-size:13px; white-space:nowrap}
-.lang>button:hover{border-color:var(--ink)}
-.menu{position:absolute; right:0; top:calc(100% + 6px); background:#fff; border:1px solid var(--line-strong); border-radius:8px; padding:4px; min-width:150px; box-shadow:0 10px 30px rgba(15,20,25,.14); text-align:left}
-.menu button{display:block; width:100%; text-align:left; border:0; background:transparent; padding:8px 12px; border-radius:5px; font-weight:500}
-.menu button:hover{background:var(--soft)}
-.menu button[aria-checked=true]{font-weight:700}
-.menu button[aria-checked=true]::after{content:" ✓"; color:var(--accent)}
+/* ---- ハンバーガー & 右メニュー ---- */
+.burger{position:fixed; right:14px; top:14px; z-index:80; box-shadow:0 2px 10px rgba(15,20,25,.18); width:42px; height:42px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:0; border:1px solid var(--line-strong); background:var(--panel); border-radius:8px}
+.burger:hover{border-color:var(--ink)}
+.burger span{display:block; width:18px; height:2px; border-radius:2px; background:var(--ink)}
+.scrim{position:fixed; inset:0; z-index:90; background:rgba(15,20,25,.5); opacity:0; visibility:hidden; transition:opacity .3s, visibility 0s .3s}
+.scrim.open{opacity:1; visibility:visible; transition:opacity .3s}
+.drawer{position:fixed; top:0; right:0; bottom:0; z-index:100; width:min(320px,86vw); background:var(--panel); color:var(--ink); border-left:1px solid var(--line-strong); box-shadow:-18px 0 50px rgba(15,20,25,.22); transform:translateX(100%); visibility:hidden; transition:transform .3s cubic-bezier(.4,0,.2,1), visibility 0s .3s; overflow-y:auto; padding:0 0 24px}
+.drawer.open{transform:none; visibility:visible; transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.dhead{display:flex; align-items:center; justify-content:space-between; padding:18px 20px 14px; border-bottom:1px solid var(--line)}
+.dhead h2{margin:0; font-family:var(--f-disp); font-weight:700; font-size:26px; letter-spacing:.02em; text-transform:uppercase}
+.dx{width:34px; height:34px; border-radius:6px; border:1px solid var(--line-strong); background:var(--panel); font-size:18px; line-height:1}
+.dx:hover{border-color:var(--ink)}
+.dsec{padding:20px 20px 0}
+.dsec h3{margin:0 0 10px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.opts{display:grid; gap:8px}
+.opts button{display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border:1px solid var(--line-strong); background:var(--panel); border-radius:8px; font-weight:600; font-size:14px}
+.opts button:hover{border-color:var(--ink)}
+.opts button .ic{width:20px; text-align:center; font-size:16px}
+.opts button[aria-checked=true]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+.opts button[aria-checked=true]::after{content:"✓"; margin-left:auto; font-weight:700}
+html.menu-open{overflow:hidden}
 
 /* ---- タブ (下線) ---- */
-.tabs{display:flex; justify-content:center; gap:6px; margin:34px auto 26px; border-bottom:1px solid var(--line); width:100%}
+.tabs{display:flex; justify-content:safe center; gap:6px; margin:34px auto 26px; border-bottom:1px solid var(--line); width:100%; overflow-x:auto; padding-bottom:1px; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none}
 .tabs button{border:0; background:transparent; padding:12px 22px; font-weight:600; font-size:15px; color:var(--muted); position:relative; white-space:nowrap}
 .tabs button:hover{color:var(--ink)}
 .tabs button[aria-selected=true]{color:var(--ink)}
@@ -103,16 +121,33 @@ input:focus,select:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(3
 .tc.none{background:#F6F7F9}.tc.none small{color:#A3ABB6}.tc.none b{color:#C3C9D2}
 .tc.w{background:#14201A}.tc.w small{color:var(--wr); opacity:.8}.tc.w b{color:var(--wr); font-weight:600}
 .tv .fp{display:none}
-#v-maps,#v-cmp{max-width:860px; margin-inline:auto}
+#v-maps,#v-cmp,#v-about{max-width:860px; margin-inline:auto}
+.about{padding:10px 26px 24px; line-height:1.75}
+.about h2{margin:26px 0 8px; font-family:var(--f-disp); font-size:24px; letter-spacing:.01em}
+.about h2:first-child{margin-top:16px}
+.about p{margin:0 0 10px}
+.about ul{margin:0 0 10px; padding-left:22px}
+.about li{margin:4px 0}
+.about a{color:var(--accent); font-weight:600; text-underline-offset:3px}
+.about .note{background:var(--soft); border-left:4px solid var(--orange); border-radius:6px; padding:10px 14px; margin:10px 0}
+.about code{font-family:var(--f-num); background:var(--soft); padding:1px 6px; border-radius:4px; font-size:13px}
+.about .links{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+.about .links a{display:inline-block; border:1px solid var(--line-strong); border-radius:6px; padding:7px 14px; text-decoration:none; color:var(--ink)}
+.about .links a:hover{border-color:var(--ink)}
+.about .sw{display:inline-flex; vertical-align:middle; margin:0 4px}
+.about .sw i{width:20px; height:10px}
 .more{margin:28px auto 0; display:block; border:1px solid var(--ink); background:#fff; border-radius:6px; padding:10px 32px; font-weight:600}
 .more:hover{background:var(--ink); color:#fff}
+.more[hidden]{display:none}
 .empty{padding:48px; text-align:center; color:var(--muted); grid-column:1/-1}
 
 .badge{display:inline-block; min-width:32px; padding:0 8px; border-radius:4px; font-size:11px; font-weight:700; color:#fff; text-align:center; line-height:1.65; letter-spacing:.02em; flex:none}
 .k-S{background:#D6336C}.k-A{background:#E8590C}.k-B{background:#1C7ED6}.k-C{background:#2B8A3E}.k-D{background:#7048E8}.k-E{background:#868E96}.k-x{background:#ADB5BD}
 
 /* ---- マップ別 ---- */
-.chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px; justify-content:center}
+.chips{display:flex; flex-wrap:nowrap; gap:6px; margin-bottom:22px; justify-content:safe center; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x proximity; padding:2px 2px 10px; scrollbar-width:thin}
+.chips button{flex:none; scroll-snap-align:center}
+#v-maps{max-width:1100px}
 .chips button{border:1px solid var(--line-strong); background:#fff; border-radius:5px; padding:5px 12px; font-size:13px; font-weight:500}
 .chips button:hover{border-color:var(--ink)}
 .chips button[aria-pressed=true]{background:var(--ink); border-color:var(--ink); color:#fff}
@@ -210,11 +245,38 @@ dialog::backdrop{background:rgba(15,20,25,.5)}
 .sheet tr.wrr td{position:sticky; top:50px; z-index:2; background:var(--wr-bg); color:var(--wr); font-weight:600; border-color:#1B2A20; cursor:default}
 .sheet tr.wrr td.c1,.sheet tr.wrr td.c2{z-index:4; color:var(--wr)}
 
+/* ---- テーマ切替アニメーション ---- */
+::view-transition-old(root),::view-transition-new(root){animation:none; mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}
+::view-transition-new(root){z-index:2}
+
+/* ---- サムネイル ---- */
+.th{display:block; width:100%; aspect-ratio:16/9; object-fit:cover; background:var(--soft); border-radius:6px}
+.thsm{width:56px; height:32px; aspect-ratio:auto; flex:none; border-radius:4px}
+.chips button.hasth{display:flex; flex-direction:column; align-items:stretch; gap:4px; padding:4px 4px 6px; width:112px; font-size:12px; text-align:center}
+.chips button.hasth .th{border-radius:3px}
+.chips button.hasth span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 2px}
+.mhero{position:relative; margin:6px 6px 8px; border-radius:8px; overflow:hidden; background:#000; color:#fff}
+.mhero .th{border-radius:0; aspect-ratio:21/9; filter:brightness(.7)}
+.mhero .cap{position:absolute; left:0; right:0; bottom:0; padding:14px 16px; background:linear-gradient(transparent,rgba(0,0,0,.75)); display:flex; justify-content:space-between; align-items:flex-end; gap:10px}
+.mhero h2{margin:0; font-family:var(--f-disp); font-size:30px; line-height:1; letter-spacing:.01em}
+.mhero .wrn{font-family:var(--f-num); font-size:13px; color:var(--wr); white-space:nowrap}
+.drow.hasth{grid-template-columns:56px minmax(0,1fr) 84px 64px}
+.crow.m .mapname{display:flex; align-items:center; justify-content:center; gap:8px}
+.crow.m .mapname .thsm{width:48px; height:27px}
+.th.err{visibility:hidden}
+/* 表の見出し: コース画像を背景に */
+.sheet th.mth{min-width:96px; color:#fff; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,.9);
+  background:linear-gradient(rgba(8,12,18,.5),rgba(8,12,18,.72)), var(--thimg) center/cover no-repeat, #2A303A}
+.sheet th.mth:hover{background:linear-gradient(rgba(8,12,18,.32),rgba(8,12,18,.6)), var(--thimg) center/cover no-repeat, #2A303A}
+.sheet th.mth.sorted{box-shadow:inset 0 -4px 0 var(--accent)}
+.sheet th.mth .ar{color:#fff; text-shadow:none}
+
 /* ---- ダークモード (表は除く) ---- */
 html[data-theme=dark]{color-scheme:dark; --bg:#0D1014; --panel:#161A20; --ink:#E8EBF0; --muted:#98A1AE; --line:#272D36; --line-strong:#3A424E; --soft:#1C2128; --accent:#7C9BFF; --orange:#FF8A4C; --warn-bg:#3A2F10}
 html[data-theme=dark] input::placeholder{color:#6E7886}
 html[data-theme=dark] input,html[data-theme=dark] select{background:var(--panel)}
-html[data-theme=dark] :is(.lang>button,.tgl,.seg,.chips button,.more,.pager button,.x,.card,.menu,dialog,.axis .mn){background:var(--panel)}
+html[data-theme=dark] :is(.tgl,.seg,.chips button,.more,.pager button,.x,.card,dialog,.axis .mn){background:var(--panel)}
 html[data-theme=dark] :is(.tgl[aria-pressed=true],.seg button[aria-pressed=true],.chips button[aria-pressed=true]){background:var(--ink); border-color:var(--ink); color:var(--bg)}
 html[data-theme=dark] .more:hover{background:var(--ink); color:var(--bg)}
 html[data-theme=dark] .dact button{color:var(--bg)}
@@ -236,19 +298,64 @@ html[data-theme=dark] .dh{background:linear-gradient(135deg,#232A34 0%,#161A20 7
 html[data-theme=dark] .dh.hold{background:linear-gradient(135deg,#1F8A4D 0%,#175233 45%,#161A20 100%)}
 html[data-theme=dark] .dh.hold .meta{color:#BDEBD0}
 html[data-theme=dark] dialog::backdrop{background:rgba(0,0,0,.65)}
-html[data-theme=dark] .menu{box-shadow:0 10px 30px rgba(0,0,0,.6)}
+html[data-theme=dark] .drawer{box-shadow:-18px 0 50px rgba(0,0,0,.6)}
+html[data-theme=dark] .scrim{background:rgba(0,0,0,.65)}
 
 @media (max-width:700px){
   .sheet .c2{min-width:120px; max-width:120px; left:42px}
   .sheet .c1{min-width:42px; width:42px}
   .page{padding:28px 14px 60px}
-  .lang{position:relative; justify-content:flex-end; margin-bottom:16px}
-  .top{display:flex; flex-direction:column-reverse}
+  .top{padding:58px 14px 30px}
+  .burger{right:10px; top:10px}
   .tabs button{padding:12px 12px; font-size:14px}
   .mrow{grid-template-columns:36px minmax(0,1fr) 78px}
   .mrow .g{display:none}
   .pick{grid-template-columns:1fr}
   .crow{grid-template-columns:62px 1fr 62px}
+
+  /* ---- スマホ向けの見直し ---- */
+  .tabs{margin:20px auto 18px}
+  .tabs button{padding:10px 14px; font-size:13px}
+  .tools{gap:8px}
+  .tools input{flex:1 1 100%; max-width:none}
+  .tools select{flex:1 1 auto}
+  .hint{flex:1 1 100%; text-align:center}
+  .list{grid-template-columns:1fr}
+  .row,.wrow{padding:12px 12px 10px}
+  .rk{font-size:28px}
+  .tot{font-size:18px}
+  .mhero{margin:4px 4px 8px}
+  .mhero .th{aspect-ratio:16/9}
+  .mhero .cap{padding:10px 12px}
+  .mhero h2{font-size:22px}
+  .mhero .wrn{font-size:12px}
+  .chips button.hasth{width:96px}
+  .vs{font-size:18px; padding:10px 8px 2px}
+  .vs>div{min-width:0; overflow-wrap:anywhere}
+  .crow{padding:4px 6px}
+  dialog{width:96vw; max-height:92dvh; border-radius:10px}
+  .dh{padding:18px 16px 12px}
+  .dh h2{font-size:24px; padding-right:40px}
+  .x{right:12px; top:12px}
+  .db{padding:2px 6px 18px}
+  .drow{grid-template-columns:minmax(0,1fr) 72px 56px; gap:6px; padding:8px 6px}
+  .drow.hasth{grid-template-columns:44px minmax(0,1fr) 72px 56px}
+  .thsm{width:44px; height:25px}
+  .about{padding:6px 16px 18px}
+  .about h2{font-size:21px}
+  .pager{gap:6px}
+  .pager span{flex:1 1 100%; text-align:center; order:-1}
+}
+@media (max-width:380px){
+  .top{padding:56px 10px 24px}
+  h1{font-size:34px}
+  .tabs button{padding:10px 11px}
+  .times{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}
+  .drow.hasth{grid-template-columns:minmax(0,1fr) 68px 52px}
+  .drow.hasth .thsm{display:none}
+}
+@media (hover:none){
+  .row:hover{box-shadow:none}
 }
 </style>
 </head>
@@ -259,14 +366,7 @@ html[data-theme=dark] .menu{box-shadow:0 10px 30px rgba(0,0,0,.6)}
       <h1>ProBeans <mark>Total Scores</mark></h1>
       <p class="sub" data-i18n="sub"></p>
     </div>
-    <div class="lang">
-      <button id="themebtn" type="button"></button>
-      <button id="langbtn" aria-haspopup="menu" aria-expanded="false">🌐 <span id="langcur">English</span> ▾</button>
-      <div class="menu" id="langmenu" role="menu" hidden>
-        <button role="menuitemradio" data-l="en">English</button>
-        <button role="menuitemradio" data-l="ja">日本語</button>
-      </div>
-    </div>
+    <button class="burger" id="burger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="drawer" data-i18n-aria="menu"><span></span><span></span><span></span></button>
   </div>
   <div class="status" id="status"></div>
 
@@ -274,6 +374,7 @@ html[data-theme=dark] .menu{box-shadow:0 10px 30px rgba(0,0,0,.6)}
     <button role="tab" id="t-overall" aria-selected="true" data-i18n="tab_overall"></button>
     <button role="tab" id="t-maps" aria-selected="false" data-i18n="tab_maps"></button>
     <button role="tab" id="t-cmp" aria-selected="false" data-i18n="tab_cmp"></button>
+    <button role="tab" id="t-about" aria-selected="false" data-i18n="tab_about"></button>
   </div>
 
   <section id="v-overall" class="tv">
@@ -305,12 +406,39 @@ html[data-theme=dark] .menu{box-shadow:0 10px 30px rgba(0,0,0,.6)}
     <datalist id="names"></datalist>
     <div class="card" id="cmpout"></div>
   </section>
+
+  <section id="v-about" hidden>
+    <div class="card about" id="aboutbody"></div>
+  </section>
 </div>
 
 <dialog id="dlg"></dialog>
 
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle" aria-hidden="true">
+  <div class="dhead"><h2 id="dtitle" data-i18n="menu"></h2><button class="dx" id="dclose" type="button" data-i18n-aria="close">×</button></div>
+  <div class="dsec"><h3 data-i18n="menu_theme"></h3>
+    <div class="opts" id="themeopts" role="radiogroup" data-i18n-aria="menu_theme">
+      <button type="button" role="radio" data-t="light"><span class="ic">☀</span><span data-i18n="theme_light_name"></span></button>
+      <button type="button" role="radio" data-t="dark"><span class="ic">☾</span><span data-i18n="theme_dark_name"></span></button>
+    </div></div>
+  <div class="dsec"><h3 data-i18n="menu_lang"></h3>
+    <div class="opts" id="langopts" role="radiogroup" data-i18n-aria="menu_lang">
+      <button type="button" role="radio" data-l="en"><span class="ic">🌐</span><span>English</span></button>
+      <button type="button" role="radio" data-l="ja"><span class="ic">🌐</span><span>日本語</span></button>
+    </div></div>
+</aside>
+
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxJunGL8SSr1lI6Cb4DezG9q98l-Lt2EbFoZjIrwlZa2imRKseKqkiaJ3JCzKhqv2BL-w/exec';
+
+const THUMB_BASE = 'https://tanabesan.github.io/probeans/ui/thumb/';
+const THUMB_FILES = ['1-2-3RedLight','BeaconBay','BoulderHill','CircusContest','DashCup','DevilsTrick','EscapeTsunami','GravityGates','HammerVille','JungleTemple','KittieKegs','LavaLake','MechaMaze','MillValley','MonsterManor','NastySeals','NeonCity','PolarPath','RicketyRun','RiskyCliffs','SharkPark','SillySlide','SpikySlopes','SplashDash','TrickyTraps','TumbleTown','UFOAttack'];
+const thumbNorm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+const THUMB_MAP = Object.fromEntries(THUMB_FILES.map(f => [thumbNorm(f), f]));
+// マップ名 → サムネURL (見つからなければ null)
+const thumbUrl = m => { const f = THUMB_MAP[thumbNorm(m)]; return f ? THUMB_BASE + f + '.png' : null; };
+const thumbImg = (m, cls = '') => { const u = thumbUrl(m); return u ? `<img class="th ${cls}" src="${u}" alt="" loading="lazy" onerror="this.classList.add('err')">` : ''; };
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -322,6 +450,8 @@ const EPS = 0.0005;
 const I18N = {
   en: {
     sub: 'Total-time ranking across all 27 LOLBeans maps',
+    menu: 'Menu', menu_theme: 'Appearance', menu_lang: 'Language', theme_light_name: 'Light', theme_dark_name: 'Dark',
+    tab_about: 'About',
     tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
     search: 'Search players', cls_label: 'Class', all_classes: 'All classes',
     view_cards: 'Cards', view_table: 'Table', col_name: 'Player',
@@ -344,6 +474,8 @@ const I18N = {
   },
   ja: {
     sub: 'LOLBeans 全27マップの合計タイムランキング',
+    menu: 'メニュー', menu_theme: '表示モード', menu_lang: '言語', theme_light_name: 'ライト', theme_dark_name: 'ダーク',
+    tab_about: 'このサイトについて',
     tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
     search: 'プレイヤー名で検索', cls_label: 'クラス', all_classes: '全クラス',
     view_cards: 'カード', view_table: '表', col_name: 'プレイヤー',
@@ -370,25 +502,85 @@ try { const s = localStorage.getItem('lang'); if (s === 'en' || s === 'ja') LANG
 const T = (k, ...a) => { const v = I18N[LANG][k]; return typeof v === 'function' ? v(...a) : v; };
 
 function updateThemeBtn() {
-  const dark = document.documentElement.dataset.theme === 'dark';
-  const b = $('themebtn');
-  b.textContent = dark ? '☀' : '☾';
-  b.title = T(dark ? 'theme_light' : 'theme_dark');
-  b.setAttribute('aria-label', b.title);
+  const cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  document.querySelectorAll('#themeopts [data-t]').forEach(b => b.setAttribute('aria-checked', b.dataset.t === cur));
 }
 function updateLegend() {
   const tb = S.view === 'table';
   $('lg-a').textContent = T(tb ? 'near_wr' : 'fast');
   $('lg-b').textContent = T(tb ? 'far_wr' : 'slow');
 }
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1g7lA2WkLydwbukZ3asJHS784rklojqsC7MfSAxOcCwk/';
+const FORM_URL = 'https://forms.gle/vj6oqR4B6AQxXxnF7';
+const VIDEO_URL = 'https://www.youtube.com/watch?v=XrQuWr8fc98';
+const ABOUT = {
+  en: {
+    h_about: 'About this site',
+    about: 'This site displays the ProBeans leaderboard from the community spreadsheet. Players are ranked by their total time across all maps, and you can browse every map time, compare two players and see how close each person is to the world record (WR).',
+    h_submit: 'Submitting your time',
+    submit: 'Enter your times in the form below to be added to the rankings.',
+    h_pb: 'If you already have a PB',
+    pb: 'Please write your previous time and your new time in the comment field of the <a href="' + SHEET_URL + '" target="_blank" rel="noopener">spreadsheet</a>. A video explains how to post a comment on the rankings.',
+    h_wr: 'World records',
+    wr: 'Every world record must be verified. If you think you have broken one, send a DM to <b>phoenix001699</b> on Discord with proof of your run.',
+    h_read: 'How to read this site',
+    read: [
+      'Overall rank is decided by the total time of all maps.',
+      'A green WR badge means the player holds that map’s world record.',
+      'Card view colors each time by its rank within the map: <span class="sw" id="swa"></span> from fastest (green) to slowest (red).',
+      'Table view colors each time by how far it is from the WR on that map.',
+      'In table view, click a map name at the top of a column to sort by that map (fastest first). Click it again to reverse the order.',
+      'If a map has no time entered, 60 seconds are added to the total score for that map.',
+      'Click a player to see their WR maps, biggest gaps to WR and best map rankings.'
+    ],
+    note: 'The data on this site is read from the spreadsheet, so it may differ slightly from the sheet until the next refresh.',
+    l_sheet: 'Spreadsheet', l_form: 'Submission form', l_video: 'How to comment (video)'
+  },
+  ja: {
+    h_about: 'このサイトについて',
+    about: 'コミュニティのスプレッドシートにある ProBeans のランキングを表示するサイトです。全マップの合計タイムで順位が決まり、マップごとのタイム、2人の比較、世界記録（WR）との差も見られます。',
+    h_submit: 'タイムの登録方法',
+    submit: 'ランキングに登録するには、下のフォームにタイムを入力してください。',
+    h_pb: 'すでにPBをお持ちの方',
+    pb: '以前のタイムと新しいタイムを、<a href="' + SHEET_URL + '" target="_blank" rel="noopener">スプレッドシート</a>のコメント欄に記入してください。ランキングにコメントを投稿する方法は、動画で解説されています。',
+    h_wr: '世界記録について',
+    wr: '世界記録はすべて検証が必要です。記録を更新したと思われる場合は、Discordで <b>phoenix001699</b> にDMを送り、その実績の証拠を提示してください。',
+    h_read: 'サイトの見方',
+    read: [
+      '総合順位は、全マップの合計タイムで決まります。',
+      '緑の WR バッジは、そのマップの世界記録を持っていることを表します。',
+      'カード表示の色は、マップ内順位に応じた色です。<span class="sw" id="swa"></span> 速い（緑）から遅い（赤）までの7段階です。',
+      '表表示の色は、そのマップのWRからどれだけ離れているかを表します。',
+      '表表示では、表の上にあるコース名を押すと、そのコースの速い順に並べ替えられます。もう一度押すと順番が逆になります。',
+      'タイムが未記入のコースがある場合は、そのコースに60秒が加算されて合計が計算されます。',
+      'プレイヤーをクリックすると、WR保持マップ、WRとの差が大きいマップ、順位が高いマップが見られます。'
+    ],
+    note: 'このサイトのデータはスプレッドシートから読み込んでいるため、次の更新まではシートと少し違う場合があります。',
+    l_sheet: 'スプレッドシート', l_form: '登録フォーム', l_video: 'コメントの書き方（動画）'
+  }
+};
+function renderAbout() {
+  const a = ABOUT[LANG];
+  $('aboutbody').innerHTML =
+    `<h2>${a.h_about}</h2><p>${a.about}</p>` +
+    `<h2>${a.h_submit}</h2><p>${a.submit}</p>` +
+    `<h2>${a.h_pb}</h2><p>${a.pb}</p>` +
+    `<h2>${a.h_wr}</h2><div class="note">${a.wr}</div>` +
+    `<h2>${a.h_read}</h2><ul>${a.read.map(x => `<li>${x}</li>`).join('')}</ul>` +
+    `<p>${a.note}</p>` +
+    `<div class="links"><a href="${SHEET_URL}" target="_blank" rel="noopener">${a.l_sheet}</a>` +
+    `<a href="${FORM_URL}" target="_blank" rel="noopener">${a.l_form}</a>` +
+    `<a href="${VIDEO_URL}" target="_blank" rel="noopener">${a.l_video}</a></div>`;
+  const sw = $('swa'); if (sw) sw.innerHTML = HEAT.map(c => `<i style="background:${c}"></i>`).join('');
+}
 function applyStatic() {
   document.documentElement.lang = LANG;
+  renderAbout();
   document.documentElement.style.setProperty('--gap-label', T('gap_label'));
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = T(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = T(el.dataset.i18nPh));
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
-  $('langcur').textContent = LANG === 'ja' ? '日本語' : 'English';
-  document.querySelectorAll('#langmenu [data-l]').forEach(b => b.setAttribute('aria-checked', b.dataset.l === LANG));
+  document.querySelectorAll('#langopts [data-l]').forEach(b => b.setAttribute('aria-checked', b.dataset.l === LANG));
   if (ERR) $('status').textContent = T('err') + ERR;
   const opt = $('cls').options[0]; if (opt) opt.textContent = T('all_classes');
   updateLegend();
@@ -445,7 +637,10 @@ async function load() {
   CAP = q90(cp); CAP_T = q90(tp);
 
   $('names').innerHTML = players.map(p => `<option value="${esc(p.name)}">`).join('');
-  $('chips').innerHTML = maps.map(m => `<button data-m="${esc(m)}" aria-pressed="false">${esc(m)}</button>`).join('');
+  $('chips').innerHTML = maps.map(m => {
+    const im = thumbImg(m, 'chth');
+    return `<button data-m="${esc(m)}" aria-pressed="false"${im ? ' class="hasth"' : ''}>${im}<span>${esc(m)}</span></button>`;
+  }).join('');
 
   applyLang();
 }
@@ -530,7 +725,10 @@ function renderTable(rows) {
   const pageRows = rows.slice(start, start + PER_PAGE);
 
   const ar = k => k === key ? (dir === 1 ? '▲' : '▼') : '';
-  const th = (k, label, cls) => `<th data-k="${esc(k)}" class="${cls || ''}${k === key ? ' sorted' : ''}" tabindex="0">${esc(label)}<span class="ar">${ar(k)}</span></th>`;
+  const th = (k, label, cls) => {
+    const u = maps.includes(k) ? thumbUrl(k) : null;
+    return `<th data-k="${esc(k)}" class="${cls || ''}${u ? ' mth' : ''}${k === key ? ' sorted' : ''}"${u ? ` style="--thimg:url('${u}')"` : ''} tabindex="0">${esc(label)}<span class="ar">${ar(k)}</span></th>`;
+  };
   const head = `<thead><tr>${th('rank', '#', 'c1')}${th('name', T('col_name'), 'c2')}` +
     maps.map(m => th(m, m)).join('') + th('score', T('total')) + th('class', T('cls_label')) + '</tr>' +
     (wr ? `<tr class="wrr"><td class="c1">WR</td><td class="c2">${esc(T('wr_name'))}</td>` +
@@ -559,8 +757,13 @@ function renderTable(rows) {
       <button data-p="last" ${last ? 'disabled' : ''} aria-label="last">»</button></div>` : '';
 
   const L = $('list');
+  // 並べ替え・ページ送りで横スクロール位置が左端に戻らないよう、再描画前に保存
+  const oldSheet = L.querySelector('.sheet');
+  const keepLeft = oldSheet ? oldSheet.scrollLeft : 0;
   L.className = 'list tablemode';
   L.innerHTML = rows.length ? `<div class="sheet"><table>${head}<tbody>${body}</tbody></table></div>${pager}` : `<div class="empty">${esc(T('no_players'))}</div>`;
+  const newSheet = L.querySelector('.sheet');
+  if (newSheet && keepLeft) newSheet.scrollLeft = keepLeft;
   $('more').hidden = true;
   $('hint').textContent = T('players', rows.length);
 }
@@ -574,7 +777,8 @@ function renderMap() {
   const wt = wr ? wr.courses[m] : null;
   const base = wt != null ? wt : (list[0] ? list[0].courses[m] : 0);
   const span = list.length ? Math.max(list[list.length - 1].courses[m] - base, 0.001) : 1;
-  let html = wt != null ? `<div class="mrow wr"><span class="k">WR</span><span class="n">${esc(T('wr_name'))}</span><span class="t">${fmt(wt)}</span><span class="g"></span></div>` : '';
+  const hero = thumbUrl(m) ? `<div class="mhero">${thumbImg(m)}<div class="cap"><h2>${esc(m)}</h2><span class="wrn">${wt != null ? 'WR ' + fmt(wt) : ''}</span></div></div>` : '';
+  let html = hero + (wt != null ? `<div class="mrow wr"><span class="k">WR</span><span class="n">${esc(T('wr_name'))}</span><span class="t">${fmt(wt)}</span><span class="g"></span></div>` : '');
   let prev = null, rk = 0;
   html += list.map((p, i) => {
     const t = p.courses[m];
@@ -606,7 +810,7 @@ function renderCompare() {
   html += diffs.map(x => {
     const w = x.d != null ? Math.abs(x.d) / maxAbs * 50 : 0;
     const aWin = x.d != null && x.d < -EPS, bWin = x.d != null && x.d > EPS;
-    return `<div class="crow m"><div class="mapname">${esc(x.m)}${x.d != null ? ' (' + T('apart', fmt(Math.abs(x.d))) + ')' : ''}</div></div>
+    return `<div class="crow m"><div class="mapname">${thumbImg(x.m, 'thsm')}<span>${esc(x.m)}${x.d != null ? ' (' + T('apart', fmt(Math.abs(x.d))) + ')' : ''}</span></div></div>
       <div class="crow"><span class="ta ${aWin ? 'w' : ''}">${x.a != null ? fmt(x.a) : '–'}</span>
       <div class="axis">${aWin ? `<span class="fa" style="width:${w}%"></span>` : ''}${bWin ? `<span class="fb" style="width:${w}%"></span>` : ''}</div>
       <span class="tb ${bWin ? 'w' : ''}">${x.b != null ? fmt(x.b) : '–'}</span></div>`;
@@ -629,6 +833,8 @@ function openPlayer(rank) {
   const top = withGap[0];
 
   const rk = x => `<small>${esc(T('map_rank', x.r, N[x.m]))}</small>`;
+  const dth = m => thumbImg(m, 'thsm');
+  const dcls = m => thumbUrl(m) ? ' hasth' : '';
   $('dlg').innerHTML = `
     <div class="dh${holds.length ? ' hold' : ''}"><button class="x" data-close aria-label="${esc(T('close'))}">×</button>
       <h2>${esc(p.name)} ${badge(p.class)}</h2>
@@ -637,12 +843,12 @@ function openPlayer(rank) {
       ${top ? `<p class="meta">${T('biggest_gap', esc(top.m), sgn(top.g))}</p>` : ''}
       <div class="dact"><button data-cmp="${esc(p.name)}">${T('cmp_btn')}</button></div></div>
     <div class="db">
-      ${holds.length ? `<h3>${T('sec_wr')}</h3>` + holds.map(x => `<div class="drow iswr"><div class="mn">${esc(x.m)}${rk(x)}</div>
+      ${holds.length ? `<h3>${T('sec_wr')}</h3>` + holds.map(x => `<div class="drow iswr${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}${rk(x)}</div>
         <span class="t">${fmt(x.t)}</span><span class="g">WR</span></div>`).join('') : ''}
-      ${withGap.length ? `<h3>${T('sec_gap')}</h3>` + withGap.map(x => `<div class="drow"><div class="mn">${esc(x.m)}${rk(x)}</div>
+      ${withGap.length ? `<h3>${T('sec_gap')}</h3>` + withGap.map(x => `<div class="drow${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}${rk(x)}</div>
         <span class="t">${fmt(x.t)}</span><span class="g">${sgn(x.g)}</span>
         <span class="gb" style="width:${(x.g / maxG * 100).toFixed(1)}%"></span></div>`).join('') : ''}
-      ${best.length ? `<h3>${T('sec_best')}</h3>` + best.map(x => `<div class="drow"><div class="mn">${esc(x.m)}</div><span class="t">${fmt(x.t)}</span><span class="g">${T('rank_short', x.r)}</span></div>`).join('') : ''}
+      ${best.length ? `<h3>${T('sec_best')}</h3>` + best.map(x => `<div class="drow${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}</div><span class="t">${fmt(x.t)}</span><span class="g">${T('rank_short', x.r)}</span></div>`).join('') : ''}
       ${missing.length ? `<h3>${T('sec_missing')}</h3><div class="drow"><div class="mn">${missing.map(esc).join(' / ')}</div></div>` : ''}
     </div>`;
   const d = $('dlg'); if (!d.open) d.showModal(); d.scrollTop = 0;
@@ -650,7 +856,7 @@ function openPlayer(rank) {
 
 /* ---- イベント ---- */
 function showTab(id) {
-  ['overall', 'maps', 'cmp'].forEach(t => {
+  ['overall', 'maps', 'cmp', 'about'].forEach(t => {
     $('v-' + t).hidden = t !== id;
     $('t-' + t).setAttribute('aria-selected', t === id);
   });
@@ -658,6 +864,7 @@ function showTab(id) {
 $('t-overall').onclick = () => showTab('overall');
 $('t-maps').onclick = () => showTab('maps');
 $('t-cmp').onclick = () => showTab('cmp');
+$('t-about').onclick = () => showTab('about');
 
 $('q').oninput = e => { S.q = e.target.value; S.limit = 48; S.page = 1; renderOverall(); };
 $('cls').onchange = e => { S.cls = e.target.value; S.limit = 48; S.page = 1; renderOverall(); };
@@ -695,7 +902,16 @@ function setView(v) {
 }
 $('seg').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setView(b.dataset.v); };
 $('maplist').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
-$('chips').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { S.map = b.dataset.m; renderMap(); } };
+$('chips').onclick = e => {
+  const b = e.target.closest('[data-m]');
+  if (b) { S.map = b.dataset.m; renderMap(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
+};
+// マウスホイールの縦回転で横スクロール
+$('chips').addEventListener('wheel', e => {
+  const c = $('chips');
+  if (c.scrollWidth <= c.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  e.preventDefault(); c.scrollLeft += e.deltaY;
+}, { passive: false });
 $('ca').oninput = renderCompare; $('cb').oninput = renderCompare;
 $('dlg').onclick = e => {
   if (e.target === $('dlg') || e.target.closest('[data-close]')) return $('dlg').close();
@@ -706,27 +922,46 @@ $('dlg').onclick = e => {
   }
 };
 
-$('themebtn').onclick = () => {
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = next;
-  try { localStorage.setItem('theme', next); } catch (e) {}
-  updateThemeBtn();
-};
-$('langbtn').onclick = e => {
-  e.stopPropagation();
-  const open = $('langmenu').hidden;
-  $('langmenu').hidden = !open;
-  $('langbtn').setAttribute('aria-expanded', open);
-};
-$('langmenu').onclick = e => {
-  const b = e.target.closest('[data-l]'); if (!b) return;
+/* ---- 右メニュー (ハンバーガー) ---- */
+function setMenu(open) {
+  $('drawer').classList.toggle('open', open);
+  $('scrim').classList.toggle('open', open);
+  $('drawer').setAttribute('aria-hidden', !open);
+  $('burger').setAttribute('aria-expanded', open);
+  document.documentElement.classList.toggle('menu-open', open);
+  if (open) $('dclose').focus(); else if ($('drawer').contains(document.activeElement)) $('burger').focus();
+}
+$('burger').onclick = () => setMenu(true);
+$('dclose').onclick = () => setMenu(false);
+$('scrim').onclick = () => setMenu(false);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('drawer').classList.contains('open')) setMenu(false); });
+
+// テーマ切替 (押したボタンの位置から円形に広がるアニメーション)
+function setTheme(next, src) {
+  if (document.documentElement.dataset.theme === next) return;
+  const apply = () => {
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (err) {}
+    updateThemeBtn();
+  };
+  // View Transitions 非対応 / 動きを減らす設定のときは即切替
+  if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
+  const r = src.getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const t = document.startViewTransition(apply);
+  t.ready.then(() => document.documentElement.animate(
+    { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${rad}px at ${x}px ${y}px)`] },
+    { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', pseudoElement: '::view-transition-new(root)' }
+  ));
+}
+$('themeopts').onclick = e => { const b = e.target.closest('[data-t]'); if (b) setTheme(b.dataset.t, b); };
+$('langopts').onclick = e => {
+  const b = e.target.closest('[data-l]'); if (!b || b.dataset.l === LANG) return;
   LANG = b.dataset.l;
   try { localStorage.setItem('lang', LANG); } catch (err) {}
-  $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false');
   applyLang();
 };
-document.addEventListener('click', () => { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); } });
 
 try { const v = localStorage.getItem('view'); if (v === 'cards' || v === 'table') S.view = v; } catch (e) {}
 applyStatic();
