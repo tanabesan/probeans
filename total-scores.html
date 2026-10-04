@@ -3,158 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var s=localStorage.getItem('theme');if(s!=='dark'&&s!=='light')s=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=s;}catch(e){}})();</script>
 <title>ProBeans Total Scores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#E6EBF6; --panel:#fff; --ink:#18214A; --muted:#6A7396; --line:#D9DFEF; --soft:#F5F7FD;
-  --accent:#3B4CCA; --orange:#F2762E; --wr:#3DFF8A; --wr-ink:#3DFF8A; --wr-bg:#0A0F0B; --warn-bg:#FFF4CC;
+  --bg:#F2F4F7; --panel:#fff; --ink:#0F1419; --muted:#5B6573; --line:#D5DAE1; --line-strong:#AEB6C2; --soft:#F6F7F9;
+  --accent:#1F4FE0; --orange:#E8590C;
+  --wr:#34E57A; --wr-ink:#34E57A; --wr-bg:#0A0E0B; --warn-bg:#FFF1C2;
+  --gold:#C29A1B; --silver:#8D96A3; --bronze:#B06A32;
+  --f-disp:"Barlow Condensed","Zen Kaku Gothic New","Hiragino Sans",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans JP","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg); color:var(--ink); font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif; font-size:14px; line-height:1.5}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
 button{font:inherit; color:inherit; cursor:pointer}
-.page{max-width:1400px; margin:0 auto; padding:26px 16px 60px}
-h1{margin:0; font-size:clamp(26px,4.5vw,38px); font-weight:900}
-.sub{margin:4px 0 0; color:var(--muted)}
-.status{margin:12px 0 0; font-size:13px; display:none; padding:4px 12px; border-radius:8px}
-.status.warn{display:inline-block; color:#9A5B00; background:var(--warn-bg)}
-.status.err{display:inline-block; color:#A3122A; background:#FDE4E8}
+.page{max-width:1400px; margin:0 auto; padding:56px 20px 80px}
 
-.tabs{display:flex; gap:4px; margin:22px 0 16px; background:#dde3f3; padding:4px; border-radius:999px; width:max-content; max-width:100%; margin-inline:auto}
-.tabs button{border:0; background:transparent; padding:8px 20px; border-radius:999px; font-weight:700; color:var(--muted); white-space:nowrap}
-.tabs button[aria-selected=true]{background:var(--ink); color:#fff}
+/* ---- ヘッダー ---- */
+.top{position:relative; text-align:center}
+h1{margin:0; font-family:var(--f-disp); font-weight:700; font-size:clamp(38px,7vw,68px); line-height:1; letter-spacing:.02em; text-transform:uppercase}
+h1 mark{background:none; color:var(--accent); font-weight:500}
+.sub{margin:14px 0 0; font-size:clamp(13px,1.8vw,15px); color:var(--muted); letter-spacing:.02em}
+.status{margin:16px 0 0; font-size:13px; display:none; padding:6px 14px; border-radius:6px}
+.status.warn{display:inline-block; background:var(--warn-bg); color:#7A5A00}
+.status.err{display:inline-block; background:#FDE3E1; color:#A3201A}
 
-.tools{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-bottom:14px}
-input,select{font:inherit; color:var(--ink); background:var(--panel); border:2px solid var(--line); border-radius:999px; padding:8px 16px; outline:none; min-width:0}
-input:focus,select:focus{border-color:var(--accent)}
-.tools input{flex:1 1 200px; max-width:320px}
-.hint{color:var(--muted); font-size:13px}
-.hint b{color:var(--ink)}
-:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.lang{position:absolute; right:0; top:-34px; z-index:30; display:flex; gap:8px; align-items:flex-start}
+.lang>button{border:1px solid var(--line-strong); background:#fff; border-radius:6px; padding:6px 12px; font-weight:500; font-size:13px; white-space:nowrap}
+.lang>button:hover{border-color:var(--ink)}
+.menu{position:absolute; right:0; top:calc(100% + 6px); background:#fff; border:1px solid var(--line-strong); border-radius:8px; padding:4px; min-width:150px; box-shadow:0 10px 30px rgba(15,20,25,.14); text-align:left}
+.menu button{display:block; width:100%; text-align:left; border:0; background:transparent; padding:8px 12px; border-radius:5px; font-weight:500}
+.menu button:hover{background:var(--soft)}
+.menu button[aria-checked=true]{font-weight:700}
+.menu button[aria-checked=true]::after{content:" ✓"; color:var(--accent)}
+
+/* ---- タブ (下線) ---- */
+.tabs{display:flex; justify-content:center; gap:6px; margin:34px auto 26px; border-bottom:1px solid var(--line); width:100%}
+.tabs button{border:0; background:transparent; padding:12px 22px; font-weight:600; font-size:15px; color:var(--muted); position:relative; white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{color:var(--ink)}
+.tabs button[aria-selected=true]::after{content:""; position:absolute; left:10px; right:10px; bottom:-1px; height:3px; background:var(--accent); border-radius:3px 3px 0 0}
+
+/* ---- ツールバー ---- */
+.tools{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; margin-bottom:24px}
+input,select{font:inherit; color:var(--ink); background:#fff; border:1px solid var(--line-strong); border-radius:6px; padding:8px 12px; outline:none; min-width:0}
+input::placeholder{color:#8993A0}
+input:focus,select:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(31,79,224,.16)}
+.tools input{flex:1 1 220px; max-width:320px}
+.hint{font-family:var(--f-num); font-size:12px; color:var(--muted); font-weight:500}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.tgl{border:1px solid var(--line-strong); background:#fff; border-radius:6px; padding:7px 14px; font-size:13px; font-weight:600}
+.tgl:hover{border-color:var(--ink)}
+.tgl[aria-pressed=true]{background:var(--ink); border-color:var(--ink); color:#fff}
+.legend{display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); font-weight:500}
+.legend span{display:inline-flex; gap:1px}
+.legend i{width:16px; height:8px}
+.legend #lgs i:first-child{border-radius:3px 0 0 3px}.legend #lgs i:last-child{border-radius:0 3px 3px 0}
 
 /* ---- 総合ランキング (カード並び) ---- */
 .lhead{display:none}
-.list{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr)); gap:10px; align-items:start}
+.list{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr)); gap:12px; align-items:start}
 .row,.wrow{
-  display:grid; grid-template-columns:36px minmax(0,1fr) auto;
+  display:grid; grid-template-columns:46px minmax(0,1fr) auto;
   grid-template-areas:"rk nm tot" "rk gap tot" "fp fp fp" "tm tm tm";
-  column-gap:10px; row-gap:2px; align-items:center;
-  border-radius:14px; padding:12px 14px; width:100%; text-align:left;
+  column-gap:10px; row-gap:1px; align-items:center;
+  border-radius:8px; padding:14px 14px 12px; width:100%; text-align:left; position:relative;
 }
-.row{background:var(--panel); border:2px solid #DCE2F1}
-.row:hover{border-color:var(--accent)}
-.wrow{grid-column:1/-1; background:var(--wr-bg); border:2px solid var(--wr); color:var(--wr-ink)}
-.rk{grid-area:rk; font-weight:900; font-size:22px; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums}
-.wrow .rk{color:var(--wr); font-size:17px}
-.r1{background:#FFF6D1}.r2{background:#ECEFF8}.r3{background:#FAE8DA}
-.r1 .rk{color:#B88A00}.r2 .rk{color:#6F789A}.r3 .rk{color:#B0612F}
-.nmwrap{grid-area:nm; display:flex; align-items:center; gap:6px; min-width:0}
+.row{background:linear-gradient(135deg,#E4E8F0 0%,#fff 75%); border:1px solid var(--line); transition:border-color .12s, box-shadow .12s}
+.row:hover{border-color:var(--ink); box-shadow:0 6px 18px rgba(15,20,25,.08)}
+.r1,.r2,.r3{border-left-width:5px}
+.r1{border-left-color:var(--gold)}.r2{border-left-color:var(--silver)}.r3{border-left-color:var(--bronze)}
+.wrow{grid-column:1/-1; background:var(--wr-bg); border:1px solid rgba(52,229,122,.4); color:var(--wr-ink)}
+.rk{grid-area:rk; font-family:var(--f-disp); font-weight:700; font-size:32px; color:var(--ink); text-align:center; line-height:1; font-variant-numeric:tabular-nums}
+.r1 .rk{color:var(--gold)}.r2 .rk{color:var(--silver)}.r3 .rk{color:var(--bronze)}
+.wrow .rk{color:var(--wr); font-size:24px; letter-spacing:.04em}
+.nmwrap{grid-area:nm; display:flex; align-items:center; gap:8px; min-width:0}
 .nm{font-weight:700; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.gap{grid-area:gap; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
-.gap::before{content:var(--gap-label)}
+.gap{grid-area:gap; color:var(--muted); font-size:12px; font-family:var(--f-num)}
+.gap::before{content:var(--gap-label); font-family:var(--f-body)}
 .wrow .gap::before{content:""}
-.tot{grid-area:tot; text-align:right; font-weight:900; font-size:20px; font-variant-numeric:tabular-nums}
+.tot{grid-area:tot; text-align:right; font-family:var(--f-num); font-weight:500; font-size:20px; letter-spacing:-.03em}
 .wrow .tot{color:var(--wr-ink)}
-.fp{grid-area:fp; display:grid; grid-template-columns:repeat(27,1fr); gap:2px; height:14px; margin-top:8px}
-.fp i{border-radius:3px; background:#E3E7F3}
+.fp{grid-area:fp; display:grid; grid-template-columns:repeat(27,1fr); gap:1px; height:10px; margin-top:12px; border-radius:3px; overflow:hidden}
+.fp i{background:#E9ECF1}
 .wfp{display:none}
-.top{position:relative; text-align:center}
-.lang{position:absolute; right:0; top:0}
-.lang>button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:7px 14px; font-weight:700; font-size:13px; white-space:nowrap}
-.lang>button:hover{border-color:var(--accent)}
-.menu{position:absolute; right:0; top:calc(100% + 6px); background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:4px; min-width:150px; z-index:20; box-shadow:0 8px 24px rgba(24,33,74,.15)}
-.menu button{display:block; width:100%; text-align:left; border:0; background:transparent; padding:8px 12px; border-radius:10px; font-weight:700}
-.menu button:hover{background:var(--soft)}
-.menu button[aria-checked=true]::after{content:" ✓"; color:var(--accent)}
-.tgl{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:7px 16px; font-size:13px; font-weight:700}
-.tgl[aria-pressed=true]{background:var(--ink); border-color:var(--ink); color:#fff}
-.times{grid-area:tm; display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:3px; margin-top:8px}
+.row.hold{background:linear-gradient(135deg,#5BEE8C 0%,#B9F6CF 45%,#fff 100%)}
+.row.hold .rk{color:var(--ink)}
+.row.hold .gap{color:#1E3A2A}
+.times{grid-area:tm; display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr)); gap:3px; margin-top:12px}
 .wrow .times{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
-.tc{display:flex; flex-direction:column; padding:3px 6px; border-radius:7px; box-shadow:inset 0 0 0 1px rgba(16,23,51,.08); line-height:1.25; font-variant-numeric:tabular-nums; background:#E3E7F3; min-width:0}
-.tc small{font-size:10px; font-weight:700; color:rgba(16,23,51,.72); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.tc b{font-size:13px; font-weight:900; color:#101733}
-.tc.none{background:#F3F5FA}.tc.none b{color:#B5BBD3}
-.tc.w{background:var(--wr-bg)}.tc.w small{color:var(--wr); opacity:.75}.tc.w b{color:var(--wr); font-weight:900}
+.tc{display:flex; flex-direction:column; padding:3px 6px; border-radius:3px; line-height:1.25; background:#E9ECF1; min-width:0}
+.tc small{font-size:10px; font-weight:500; color:rgba(15,20,25,.72); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tc b{font-family:var(--f-num); font-size:13px; font-weight:500; color:var(--ink); letter-spacing:-.03em}
+.tc.none{background:#F6F7F9}.tc.none small{color:#A3ABB6}.tc.none b{color:#C3C9D2}
+.tc.w{background:#14201A}.tc.w small{color:var(--wr); opacity:.8}.tc.w b{color:var(--wr); font-weight:600}
 .tv .fp{display:none}
-.legend{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); font-weight:700}
-.legend span{display:inline-flex; gap:2px}
-.legend i{width:16px; height:12px; border-radius:3px}
 #v-maps,#v-cmp{max-width:860px; margin-inline:auto}
-.more{margin:14px auto 0; display:block; border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:9px 26px; font-weight:700}
-.more:hover{border-color:var(--accent)}
-.empty{padding:40px; text-align:center; color:var(--muted)}
+.more{margin:28px auto 0; display:block; border:1px solid var(--ink); background:#fff; border-radius:6px; padding:10px 32px; font-weight:600}
+.more:hover{background:var(--ink); color:#fff}
+.empty{padding:48px; text-align:center; color:var(--muted); grid-column:1/-1}
 
-.badge{display:inline-block; min-width:36px; padding:1px 9px; border-radius:999px; font-size:12px; font-weight:900; color:#fff; text-align:center}
-.k-S{background:#E0457B}.k-A{background:#F2762E}.k-B{background:#3B8AE0}.k-C{background:#2FA37A}.k-D{background:#7C6BC9}.k-E{background:#8A93B2}.k-x{background:#B5BBD3}
+.badge{display:inline-block; min-width:32px; padding:0 8px; border-radius:4px; font-size:11px; font-weight:700; color:#fff; text-align:center; line-height:1.65; letter-spacing:.02em; flex:none}
+.k-S{background:#D6336C}.k-A{background:#E8590C}.k-B{background:#1C7ED6}.k-C{background:#2B8A3E}.k-D{background:#7048E8}.k-E{background:#868E96}.k-x{background:#ADB5BD}
 
 /* ---- マップ別 ---- */
-.chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px}
-.chips button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:5px 13px; font-size:13px; font-weight:700}
-.chips button[aria-pressed=true]{background:var(--accent); border-color:var(--accent); color:#fff}
-.card{background:var(--panel); border-radius:16px; padding:8px 8px}
-.mrow{display:grid; grid-template-columns:40px minmax(0,1fr) 84px 76px; gap:10px; align-items:center; width:100%; text-align:left; border:0; background:transparent; padding:8px 10px; border-radius:10px; position:relative}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px; justify-content:center}
+.chips button{border:1px solid var(--line-strong); background:#fff; border-radius:5px; padding:5px 12px; font-size:13px; font-weight:500}
+.chips button:hover{border-color:var(--ink)}
+.chips button[aria-pressed=true]{background:var(--ink); border-color:var(--ink); color:#fff}
+.card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px}
+.mrow{display:grid; grid-template-columns:44px minmax(0,1fr) 92px 76px; gap:10px; align-items:center; width:100%; text-align:left; border:0; background:transparent; padding:10px 12px; border-radius:6px; position:relative; border-bottom:1px solid var(--line)}
+.card>.mrow:last-child{border-bottom:0}
 button.mrow:hover{background:var(--soft)}
-.mrow .bar{position:absolute; left:0; bottom:0; height:3px; background:var(--accent); opacity:.25; border-radius:3px}
-.mrow .n{font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.mrow .t{font-weight:900; text-align:right; font-variant-numeric:tabular-nums}
-.mrow .g{color:var(--muted); font-size:12px; text-align:right; font-variant-numeric:tabular-nums}
-.mrow .k{text-align:center; color:var(--muted); font-weight:700}
-.mrow.wr{background:var(--wr-bg); margin-bottom:6px; color:var(--wr-ink)}
-.mrow.wr .k{color:var(--wr-ink); font-weight:900}
+.mrow .bar{position:absolute; left:12px; bottom:-1px; height:2px; background:var(--accent); opacity:.55; max-width:calc(100% - 24px)}
+.mrow .n{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.mrow .t{font-family:var(--f-num); font-weight:500; font-size:15px; text-align:right; letter-spacing:-.03em}
+.mrow .g{color:var(--muted); font-size:12px; text-align:right; font-family:var(--f-num)}
+.mrow .k{text-align:center; font-family:var(--f-disp); font-weight:700; font-size:20px; color:var(--muted)}
+.mrow.wr{background:var(--wr-bg); margin-bottom:6px; color:var(--wr-ink); border-bottom:0}
+.mrow.wr .k{color:var(--wr-ink)}
 
 /* ---- 比較 ---- */
-.pick{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px}
-.pick label{display:block; font-size:12px; font-weight:700; margin:0 0 4px 6px}
-.pick .a label{color:var(--accent)} .pick .b label{color:var(--orange)}
+.pick{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px}
+.pick label{display:block; font-size:12px; font-weight:700; margin:0 0 6px 2px; letter-spacing:.04em}
+.pick .a label{color:#1C64F2} .pick .b label{color:var(--orange)}
 .pick input{width:100%}
-.pick .a input{border-color:#C8CEF1} .pick .b input{border-color:#F7CBB0}
-.vs{display:flex; justify-content:space-between; gap:12px; font-weight:900; font-size:18px; padding:6px 12px 2px}
-.vs .a{color:var(--accent)} .vs .b{color:var(--orange); text-align:right}
-.vs small{display:block; font-size:12px; font-weight:500; color:var(--muted)}
-.crow{display:grid; grid-template-columns:70px 1fr 70px; gap:8px; align-items:center; padding:5px 10px; font-size:13px; font-variant-numeric:tabular-nums}
+.pick .a input:focus{border-color:#1C64F2; box-shadow:0 0 0 3px rgba(28,100,242,.16)}
+.pick .b input:focus{border-color:var(--orange); box-shadow:0 0 0 3px rgba(232,89,12,.16)}
+.vs{display:flex; justify-content:space-between; gap:12px; font-family:var(--f-disp); font-weight:700; font-size:24px; padding:10px 14px 2px; letter-spacing:.01em}
+.vs .a{color:#1C64F2} .vs .b{color:var(--orange); text-align:right}
+.vs small{display:block; font-family:var(--f-body); font-size:12px; font-weight:400; color:var(--muted); letter-spacing:0}
+.crow{display:grid; grid-template-columns:76px 1fr 76px; gap:8px; align-items:center; padding:4px 12px; font-size:13px; font-family:var(--f-num)}
 .crow .ta{text-align:right} .crow .tb{text-align:left}
-.crow .w{font-weight:900}
-.axis{position:relative; height:22px; display:flex; align-items:center; justify-content:center}
-.axis::before{content:""; position:absolute; left:50%; top:2px; bottom:2px; width:2px; background:var(--line)}
-.axis .mn{position:relative; z-index:1; background:var(--panel); padding:0 6px; font-size:11px; color:var(--muted); white-space:nowrap}
-.axis .fa,.axis .fb{position:absolute; top:5px; height:12px; border-radius:6px}
-.axis .fa{right:50%; background:var(--accent)} .axis .fb{left:50%; background:var(--orange)}
-.crow.m .mapname{grid-column:1/4; text-align:center; font-size:12px; font-weight:700; color:var(--muted); padding-top:6px}
+.crow .w{font-weight:600}
+.axis{position:relative; height:20px; display:flex; align-items:center; justify-content:center}
+.axis::before{content:""; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--line-strong)}
+.axis .mn{position:relative; z-index:1; background:#fff; padding:0 6px; font-size:11px; color:var(--muted); white-space:nowrap}
+.axis .fa,.axis .fb{position:absolute; top:5px; height:10px; border-radius:2px}
+.axis .fa{right:50%; background:#1C64F2} .axis .fb{left:50%; background:var(--orange)}
+.crow.m .mapname{grid-column:1/4; text-align:center; font-family:var(--f-body); font-size:12px; font-weight:600; color:var(--muted); padding-top:10px}
 
 /* ---- プレイヤー詳細 ---- */
-dialog{border:0; padding:0; border-radius:20px; width:min(560px,94vw); max-height:88vh; background:var(--panel); color:var(--ink)}
-dialog::backdrop{background:rgba(24,33,74,.45)}
-.dh{position:sticky; top:0; background:var(--panel); padding:18px 20px 12px; border-bottom:1px solid var(--line); z-index:1}
-.dh h2{margin:0; font-size:22px; font-weight:900; padding-right:40px; overflow-wrap:anywhere}
-.dh .meta{margin:4px 0 0; color:var(--muted); font-size:13px}
-.dh .meta b{color:var(--ink)}
-.x{position:absolute; right:12px; top:12px; width:34px; height:34px; border-radius:50%; border:0; background:var(--soft); font-size:18px; font-weight:700}
-.dact{display:flex; gap:8px; margin-top:12px}
-.dact button{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:5px 14px; font-weight:700; font-size:13px}
-.dact button:hover{border-color:var(--accent)}
-.db{padding:6px 12px 16px}
-.db h3{margin:12px 8px 4px; font-size:13px; color:var(--muted); font-weight:700}
-.drow{display:grid; grid-template-columns:minmax(0,1fr) 74px 64px; gap:8px; align-items:center; padding:6px 8px; position:relative}
-.drow .mn{font-weight:700; font-size:13px}
-.drow .mn small{display:block; font-weight:500; color:var(--muted); font-size:11px}
-.drow .t{text-align:right; font-weight:900; font-variant-numeric:tabular-nums}
-.drow .g{text-align:right; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
-.wrtag{display:inline-block; background:var(--wr-bg); color:var(--wr); border-radius:999px; padding:1px 9px; font-size:12px; font-weight:900; white-space:nowrap; flex:none}
-.drow.iswr{background:var(--wr-bg); color:var(--wr); border-radius:10px; margin-bottom:4px}
+dialog{border:0; padding:0; border-radius:12px; width:min(580px,94vw); max-height:88vh; background:#fff; color:var(--ink); box-shadow:0 24px 70px rgba(15,20,25,.35); overflow:auto}
+dialog::backdrop{background:rgba(15,20,25,.5)}
+.dh{position:sticky; top:0; background:linear-gradient(135deg,#E4E8F0 0%,#fff 75%); padding:22px 24px 16px; border-bottom:1px solid var(--line); z-index:1}
+.dh.hold{background:linear-gradient(135deg,#5BEE8C 0%,#B9F6CF 45%,#fff 100%)}
+.dh.hold .meta{color:#1E3A2A}
+.dh h2{margin:0; font-family:var(--f-disp); font-weight:700; font-size:32px; line-height:1.1; letter-spacing:.01em; padding-right:44px; overflow-wrap:anywhere}
+.dh .meta{margin:8px 0 0; color:var(--muted); font-size:13px}
+.dh .meta b{color:var(--ink); font-weight:600}
+.x{position:absolute; right:16px; top:16px; width:32px; height:32px; border-radius:6px; border:1px solid var(--line-strong); background:#fff; font-size:17px; line-height:1}
+.x:hover{border-color:var(--ink)}
+.dact{display:flex; gap:8px; margin-top:14px}
+.dact button{border:0; background:var(--ink); color:#fff; border-radius:6px; padding:8px 16px; font-weight:600; font-size:13px}
+.dact button:hover{background:var(--accent)}
+.db{padding:4px 14px 22px}
+.db h3{margin:20px 10px 6px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.drow{display:grid; grid-template-columns:minmax(0,1fr) 84px 64px; gap:8px; align-items:center; padding:8px 10px; position:relative; border-bottom:1px solid var(--line)}
+.drow .mn{font-weight:600; font-size:13px}
+.drow .mn small{display:block; font-weight:400; color:var(--muted); font-size:11px}
+.drow .t{text-align:right; font-family:var(--f-num); font-weight:500; font-size:14px; letter-spacing:-.03em}
+.drow .g{text-align:right; font-size:12px; color:var(--muted); font-family:var(--f-num)}
+.wrtag{display:inline-block; background:var(--wr-bg); color:var(--wr); border:1px solid rgba(52,229,122,.5); border-radius:4px; padding:0 8px; font-size:11px; font-weight:700; line-height:1.65; white-space:nowrap; flex:none; letter-spacing:.02em}
+.drow.iswr{background:var(--wr-bg); color:var(--wr); border-radius:6px; margin-bottom:4px; border-bottom:0}
 .drow.iswr .mn small,.drow.iswr .g{color:var(--wr)}
-.wrlist{margin:4px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center}
-.drow .gb{position:absolute; left:8px; bottom:0; height:3px; border-radius:3px; background:var(--orange); opacity:.55}
+.wrlist{margin:10px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.drow .gb{position:absolute; left:10px; bottom:-1px; height:2px; background:var(--orange)}
+
+.seg{display:inline-flex; border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; background:#fff}
+.seg button{border:0; background:transparent; padding:7px 14px; font-size:13px; font-weight:600; color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line-strong)}
+.seg button[aria-pressed=true]{background:var(--ink); color:#fff}
+#v-overall.tbl .tgl{display:none}
+
+.pager{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin-top:16px; font-size:13px}
+.pager span{font-family:var(--f-num); font-size:12px; color:var(--muted); padding:0 8px}
+.pager button{border:1px solid var(--line-strong); background:#fff; border-radius:6px; padding:6px 12px; font-weight:600; font-size:13px}
+.pager button:hover:not(:disabled){border-color:var(--ink)}
+.pager button:disabled{opacity:.35; cursor:default}
+/* ---- 表表示 (スプレッドシート風) ---- */
+.list.tablemode{display:block}
+.sheet{--ink:#0F1419; --muted:#5B6573; --line:#D5DAE1; --line-strong:#AEB6C2; --soft:#F6F7F9; --accent:#1F4FE0; color:#0F1419; color-scheme:light; overflow:auto; max-height:76vh; background:#fff; border:1px solid var(--line-strong); border-radius:8px}
+.sheet table{border-collapse:separate; border-spacing:0; width:max-content; min-width:100%; font-size:13px}
+.sheet th,.sheet td{border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 10px; height:34px; white-space:nowrap}
+.sheet th{position:sticky; top:0; z-index:3; height:50px; background:#F1F3F4; font-size:11px; font-weight:700; white-space:normal; text-align:center; cursor:pointer; min-width:76px; line-height:1.2; user-select:none}
+.sheet th:hover{background:#E6E9EC}
+.sheet th.sorted{background:#DCE6FF}
+.sheet th .ar{display:block; font-size:9px; height:11px; color:var(--accent)}
+.sheet td.n{text-align:right; font-family:var(--f-num); font-size:12.5px}
+.sheet td.w{background:var(--wr-bg); color:var(--wr); font-weight:600}
+.sheet tr.hold td.c2{background:#2BEA6B; color:#06240F}
+.sheet td.tt{font-weight:600; background:#FAFBFC}
+.sheet td.cc{text-align:center}
+.sheet .c1,.sheet .c2{position:sticky; z-index:2; background:#fff}
+.sheet th.c1,.sheet th.c2{z-index:5; background:#F1F3F4; cursor:default}
+.sheet .c1{left:0; min-width:48px; width:48px; text-align:center; font-family:var(--f-num); color:var(--muted)}
+.sheet .c2{left:48px; min-width:170px; max-width:170px; overflow:hidden; text-overflow:ellipsis; font-weight:600; text-align:left; border-right:2px solid var(--line-strong)}
+.sheet tbody tr{cursor:pointer}
+.sheet tbody tr:hover td{background:#F2F6FF}
+.sheet tbody tr:hover td.w{background:var(--wr-bg)}
+.sheet tr.wrr td{position:sticky; top:50px; z-index:2; background:var(--wr-bg); color:var(--wr); font-weight:600; border-color:#1B2A20; cursor:default}
+.sheet tr.wrr td.c1,.sheet tr.wrr td.c2{z-index:4; color:var(--wr)}
+
+/* ---- ダークモード (表は除く) ---- */
+html[data-theme=dark]{color-scheme:dark; --bg:#0D1014; --panel:#161A20; --ink:#E8EBF0; --muted:#98A1AE; --line:#272D36; --line-strong:#3A424E; --soft:#1C2128; --accent:#7C9BFF; --orange:#FF8A4C; --warn-bg:#3A2F10}
+html[data-theme=dark] input::placeholder{color:#6E7886}
+html[data-theme=dark] input,html[data-theme=dark] select{background:var(--panel)}
+html[data-theme=dark] :is(.lang>button,.tgl,.seg,.chips button,.more,.pager button,.x,.card,.menu,dialog,.axis .mn){background:var(--panel)}
+html[data-theme=dark] :is(.tgl[aria-pressed=true],.seg button[aria-pressed=true],.chips button[aria-pressed=true]){background:var(--ink); border-color:var(--ink); color:var(--bg)}
+html[data-theme=dark] .more:hover{background:var(--ink); color:var(--bg)}
+html[data-theme=dark] .dact button{color:var(--bg)}
+html[data-theme=dark] .dact button:hover{background:var(--accent)}
+html[data-theme=dark] .status.warn{color:#F5D98A}
+html[data-theme=dark] .status.err{background:#4A1E1E; color:#FFB4AE}
+html[data-theme=dark] .row{background:linear-gradient(135deg,#1F252E 0%,#161A20 75%)}
+html[data-theme=dark] .row.hold{background:linear-gradient(135deg,#1F8A4D 0%,#175233 45%,#161A20 100%)}
+html[data-theme=dark] .row.hold .gap{color:#BDEBD0}
+html[data-theme=dark] .row:hover{box-shadow:0 6px 18px rgba(0,0,0,.5)}
+html[data-theme=dark] .fp i{background:#2A303A}
+html[data-theme=dark] .tc b{color:#0F1419}
+html[data-theme=dark] .tc.w b{color:var(--wr)}
+html[data-theme=dark] .tc.none{background:#1E242C}
+html[data-theme=dark] .tc.none small{color:#6E7886}
+html[data-theme=dark] .tc.none b{color:#4B5361}
+html[data-theme=dark] .vs .a,html[data-theme=dark] .pick .a label{color:#6EA0FF}
+html[data-theme=dark] .dh{background:linear-gradient(135deg,#232A34 0%,#161A20 75%)}
+html[data-theme=dark] .dh.hold{background:linear-gradient(135deg,#1F8A4D 0%,#175233 45%,#161A20 100%)}
+html[data-theme=dark] .dh.hold .meta{color:#BDEBD0}
+html[data-theme=dark] dialog::backdrop{background:rgba(0,0,0,.65)}
+html[data-theme=dark] .menu{box-shadow:0 10px 30px rgba(0,0,0,.6)}
 
 @media (max-width:700px){
-  .lang{position:static; text-align:right; margin-bottom:8px}
+  .sheet .c2{min-width:120px; max-width:120px; left:42px}
+  .sheet .c1{min-width:42px; width:42px}
+  .page{padding:28px 14px 60px}
+  .lang{position:relative; justify-content:flex-end; margin-bottom:16px}
   .top{display:flex; flex-direction:column-reverse}
-  .mrow{grid-template-columns:34px minmax(0,1fr) 72px}
+  .tabs button{padding:12px 12px; font-size:14px}
+  .mrow{grid-template-columns:36px minmax(0,1fr) 78px}
   .mrow .g{display:none}
   .pick{grid-template-columns:1fr}
-  .crow{grid-template-columns:58px 1fr 58px}
+  .crow{grid-template-columns:62px 1fr 62px}
 }
 </style>
 </head>
@@ -162,10 +256,11 @@ dialog::backdrop{background:rgba(24,33,74,.45)}
 <div class="page">
   <div class="top">
     <div>
-      <h1>ProBeans Total Scores</h1>
+      <h1>ProBeans <mark>Total Scores</mark></h1>
       <p class="sub" data-i18n="sub"></p>
     </div>
     <div class="lang">
+      <button id="themebtn" type="button"></button>
       <button id="langbtn" aria-haspopup="menu" aria-expanded="false">🌐 <span id="langcur">English</span> ▾</button>
       <div class="menu" id="langmenu" role="menu" hidden>
         <button role="menuitemradio" data-l="en">English</button>
@@ -185,8 +280,12 @@ dialog::backdrop{background:rgba(24,33,74,.45)}
     <div class="tools">
       <input id="q" type="search" data-i18n-ph="search" data-i18n-aria="search">
       <select id="cls" data-i18n-aria="cls_label"><option value=""></option></select>
+      <div class="seg" id="seg" role="group">
+        <button data-v="cards" aria-pressed="true" data-i18n="view_cards"></button>
+        <button data-v="table" aria-pressed="false" data-i18n="view_table"></button>
+      </div>
       <button class="tgl" id="tgl" aria-pressed="true" data-i18n="toggle"></button>
-      <span class="legend" id="legend"><span data-i18n="fast"></span><span id="lgs"></span><span data-i18n="slow"></span></span>
+      <span class="legend" id="legend"><span id="lg-a"></span><span id="lgs"></span><span id="lg-b"></span></span>
       <div class="hint" id="hint"></div>
     </div>
     <div class="list" id="list"><div class="empty" data-i18n="loading"></div></div>
@@ -225,6 +324,9 @@ const I18N = {
     sub: 'Total-time ranking across all 27 LOLBeans maps',
     tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
     search: 'Search players', cls_label: 'Class', all_classes: 'All classes',
+    view_cards: 'Cards', view_table: 'Table', col_name: 'Player',
+    theme_dark: 'Switch to dark mode', theme_light: 'Switch to light mode',
+    near_wr: 'Close to WR', far_wr: 'Far from WR', prev: 'Prev', next: 'Next', page_of: (a, b) => `Page ${a} / ${b}`,
     toggle: 'Show every map time', fast: 'Fast', slow: 'Slow', loading: 'Loading…', more: 'Show more',
     pa: 'Player A', pb: 'Player B', enter_name: 'Enter a name',
     cmp_empty: 'Pick two players to compare their times map by map',
@@ -244,6 +346,9 @@ const I18N = {
     sub: 'LOLBeans 全27マップの合計タイムランキング',
     tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
     search: 'プレイヤー名で検索', cls_label: 'クラス', all_classes: '全クラス',
+    view_cards: 'カード', view_table: '表', col_name: 'プレイヤー',
+    theme_dark: 'ダークモードにする', theme_light: 'ライトモードにする',
+    near_wr: 'WRに近い', far_wr: 'WRから遠い', prev: '前へ', next: '次へ', page_of: (a, b) => `${a} / ${b} ページ`,
     toggle: '全マップのタイムを表示', fast: '速い', slow: '遅い', loading: '読み込み中…', more: 'もっと見る',
     pa: 'プレイヤーA', pb: 'プレイヤーB', enter_name: '名前を入力',
     cmp_empty: '2人の名前を選ぶと、マップごとの差が見られます',
@@ -264,6 +369,18 @@ let LANG = 'en', ERR = null;
 try { const s = localStorage.getItem('lang'); if (s === 'en' || s === 'ja') LANG = s; } catch (e) {}
 const T = (k, ...a) => { const v = I18N[LANG][k]; return typeof v === 'function' ? v(...a) : v; };
 
+function updateThemeBtn() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const b = $('themebtn');
+  b.textContent = dark ? '☀' : '☾';
+  b.title = T(dark ? 'theme_light' : 'theme_dark');
+  b.setAttribute('aria-label', b.title);
+}
+function updateLegend() {
+  const tb = S.view === 'table';
+  $('lg-a').textContent = T(tb ? 'near_wr' : 'fast');
+  $('lg-b').textContent = T(tb ? 'far_wr' : 'slow');
+}
 function applyStatic() {
   document.documentElement.lang = LANG;
   document.documentElement.style.setProperty('--gap-label', T('gap_label'));
@@ -274,6 +391,8 @@ function applyStatic() {
   document.querySelectorAll('#langmenu [data-l]').forEach(b => b.setAttribute('aria-checked', b.dataset.l === LANG));
   if (ERR) $('status').textContent = T('err') + ERR;
   const opt = $('cls').options[0]; if (opt) opt.textContent = T('all_classes');
+  updateLegend();
+  updateThemeBtn();
 }
 function applyLang() {
   applyStatic();
@@ -290,7 +409,9 @@ function buildClassSelect() {
 }
 
 let DB, maps, wr, players, sorted = {}, N = {};
-const S = { q: '', cls: '', limit: 48, map: null, times: true };
+const S = { q: '', cls: '', limit: 48, map: null, times: true, view: 'cards', sortKey: 'rank', sortDir: 1, page: 1, pages: 1 };
+const PER_PAGE = 50;
+let CAP = 0.2, CAP_T = 0.1; // WRとの差(割合)がこの値以上で赤
 
 async function load() {
   const st = $('status');
@@ -314,6 +435,14 @@ async function load() {
     N[m] = sorted[m].length;
   });
   S.map = maps[0] || null;
+  // WRからの差(割合)の90パーセンタイルを「赤」の基準にする
+  const q90 = a => { a.sort((x, y) => x - y); return a.length ? Math.max(a[Math.floor(a.length * 0.9)], 0.005) : 0.1; };
+  const cp = [], tp = [];
+  if (wr) players.forEach(p => {
+    maps.forEach(m => { const v = p.courses[m], w = wr.courses[m]; if (v != null && w > 0) cp.push(v / w - 1); });
+    if (wr.score > 0) tp.push(p.score / wr.score - 1);
+  });
+  CAP = q90(cp); CAP_T = q90(tp);
 
   $('names').innerHTML = players.map(p => `<option value="${esc(p.name)}">`).join('');
   $('chips').innerHTML = maps.map(m => `<button data-m="${esc(m)}" aria-pressed="false">${esc(m)}</button>`).join('');
@@ -332,10 +461,10 @@ function mapRank(m, t) {
   return lo + 1;
 }
 // マップ内順位の割合(0=最速〜1=最遅)を7段階の色に
-const HEAT = ['#3FD27F', '#9BE9A8', '#CDF0A0', '#FBEB8E', '#FFCF8F', '#FFA9A3', '#F77B83'];
+const HEAT = ['#34C77B', '#8FDB9A', '#C9E9A2', '#F3E59B', '#F8CB8C', '#F2A39B', '#E4707A'];
 const HEAT_CUT = [0.05, 0.2, 0.4, 0.6, 0.8, 0.95];
 function heatSoft(m, t) {
-  const n = N[m]; if (n < 2) return '#E3E7F3';
+  const n = N[m]; if (n < 2) return '#E9ECF1';
   const p = (mapRank(m, t) - 1) / (n - 1);
   let i = 0; while (i < HEAT_CUT.length && p > HEAT_CUT[i]) i++;
   return HEAT[i];
@@ -359,18 +488,80 @@ function heat(m, t) { return heatSoft(m, t); }
 function renderOverall() {
   const q = S.q.trim().toLowerCase();
   const rows = players.filter(p => (!q || p.name.toLowerCase().includes(q)) && (!S.cls || p.class === S.cls));
+  if (S.view === 'table') { renderTable(rows); return; }
+  $('list').className = 'list';
   const shown = rows.slice(0, S.limit);
   const wrRow = wr ? `<div class="wrow"><span class="rk">WR</span><span class="nmwrap"><span class="nm">${esc(T('wr_name'))}</span>${badge(wr.class)}</span><span class="wfp"></span><span class="gap"></span><span class="tot">${fmt(wr.score)}</span>${S.times ? wrTimeGrid() : ''}</div>` : '';
   $('list').innerHTML = wrRow + (shown.length ? shown.map(p => {
     const fp = maps.map(m => p.courses[m] != null
       ? `<i style="background:${heat(m, p.courses[m])}" title="${esc(m)} ${fmt(p.courses[m])}"></i>` : '<i></i>').join('');
-    return `<button class="row r${p.rank}" data-r="${p.rank}">
+    return `<button class="row r${p.rank}${p.wrs.length ? ' hold' : ''}" data-r="${p.rank}">
       <span class="rk">${p.rank}</span><span class="nmwrap"><span class="nm">${esc(p.name)}</span>${badge(p.class)}${p.wrs.length ? `<span class="wrtag">WR×${p.wrs.length}</span>` : ''}</span>
       <span class="fp">${fp}</span>
       <span class="gap">${wr ? sgn(p.score - wr.score) : ''}</span>
       <span class="tot">${fmt(p.score)}</span>${S.times ? timeGrid(p) : ''}</button>`;
   }).join('') : `<div class="empty">${esc(T('no_players'))}</div>`);
   $('more').hidden = rows.length <= S.limit;
+  $('hint').textContent = T('players', rows.length);
+}
+
+// WRとの差(割合)で緑→赤。WRと同タイムは別扱い
+function gapColor(v, w, cap) {
+  if (!(w > 0)) return '';
+  const f = Math.max(0, Math.min(1, (v / w - 1) / cap));
+  return HEAT[Math.round(f * (HEAT.length - 1))];
+}
+function renderTable(rows) {
+  const key = S.sortKey, dir = S.sortDir;
+  const val = p => key === 'score' ? p.score : key === 'name' ? p.name.toLowerCase() : key === 'rank' ? p.rank
+    : key === 'class' ? (p.class ? clsOrder(p.class) : 999) : p.courses[key];
+  rows = rows.slice().sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return (x < y ? -1 : x > y ? 1 : 0) * dir;
+  });
+
+  // ページ分割 (表示するのは1ページ分だけ)
+  S.pages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
+  S.page = Math.min(Math.max(1, S.page), S.pages);
+  const start = (S.page - 1) * PER_PAGE;
+  const pageRows = rows.slice(start, start + PER_PAGE);
+
+  const ar = k => k === key ? (dir === 1 ? '▲' : '▼') : '';
+  const th = (k, label, cls) => `<th data-k="${esc(k)}" class="${cls || ''}${k === key ? ' sorted' : ''}" tabindex="0">${esc(label)}<span class="ar">${ar(k)}</span></th>`;
+  const head = `<thead><tr>${th('rank', '#', 'c1')}${th('name', T('col_name'), 'c2')}` +
+    maps.map(m => th(m, m)).join('') + th('score', T('total')) + th('class', T('cls_label')) + '</tr>' +
+    (wr ? `<tr class="wrr"><td class="c1">WR</td><td class="c2">${esc(T('wr_name'))}</td>` +
+      maps.map(m => `<td class="n">${wr.courses[m] != null ? fmt(wr.courses[m]) : ''}</td>`).join('') +
+      `<td class="n tt" style="background:var(--wr-bg)">${fmt(wr.score)}</td><td class="cc">${badge(wr.class)}</td></tr>` : '') + '</thead>';
+  const body = pageRows.map(p => {
+    const tds = maps.map(m => {
+      const v = p.courses[m];
+      if (v == null) return '<td class="n"></td>';
+      const w = wr ? wr.courses[m] : null;
+      if (w != null && Math.abs(v - w) < EPS) return `<td class="n w">${fmt(v)}</td>`;
+      const c = gapColor(v, w, CAP);
+      return `<td class="n"${c ? ` style="background:${c}"` : ''} title="${esc(m)}${w != null ? ' ' + sgn(v - w) : ''}">${fmt(v)}</td>`;
+    }).join('');
+    const tc = wr ? gapColor(p.score, wr.score, CAP_T) : '';
+    return `<tr data-r="${p.rank}"${p.wrs.length ? ' class="hold"' : ''}><td class="c1">${p.rank}</td><td class="c2" title="${esc(p.name)}">${esc(p.name)}</td>${tds}` +
+      `<td class="n tt"${tc ? ` style="background:${tc}"` : ''}>${fmt(p.score)}</td><td class="cc">${badge(p.class)}</td></tr>`;
+  }).join('');
+
+  const first = S.page === 1, last = S.page === S.pages;
+  const pager = S.pages > 1 ? `<div class="pager">
+      <button data-p="first" ${first ? 'disabled' : ''} aria-label="first">«</button>
+      <button data-p="prev" ${first ? 'disabled' : ''}>‹ ${esc(T('prev'))}</button>
+      <span>${esc(T('page_of', S.page, S.pages))} · ${start + 1}–${Math.min(start + PER_PAGE, rows.length)} / ${rows.length}</span>
+      <button data-p="next" ${last ? 'disabled' : ''}>${esc(T('next'))} ›</button>
+      <button data-p="last" ${last ? 'disabled' : ''} aria-label="last">»</button></div>` : '';
+
+  const L = $('list');
+  L.className = 'list tablemode';
+  L.innerHTML = rows.length ? `<div class="sheet"><table>${head}<tbody>${body}</tbody></table></div>${pager}` : `<div class="empty">${esc(T('no_players'))}</div>`;
+  $('more').hidden = true;
   $('hint').textContent = T('players', rows.length);
 }
 
@@ -439,7 +630,7 @@ function openPlayer(rank) {
 
   const rk = x => `<small>${esc(T('map_rank', x.r, N[x.m]))}</small>`;
   $('dlg').innerHTML = `
-    <div class="dh"><button class="x" data-close aria-label="${esc(T('close'))}">×</button>
+    <div class="dh${holds.length ? ' hold' : ''}"><button class="x" data-close aria-label="${esc(T('close'))}">×</button>
       <h2>${esc(p.name)} ${badge(p.class)}</h2>
       <p class="meta">${T('overall')} <b>${T('rank_ord', p.rank)}</b> · ${T('total')} <b>${fmt(p.score)}</b>${wr ? ' · ' + T('wr_gap') + ' <b>' + sgn(p.score - wr.score) + '</b>' : ''}</p>
       ${holds.length ? `<div class="wrlist"><span class="wrtag">${T('wr_hold_n', holds.length)}</span>${holds.map(x => `<span class="wrtag">${esc(x.m)}</span>`).join('')}</div>` : ''}
@@ -468,8 +659,8 @@ $('t-overall').onclick = () => showTab('overall');
 $('t-maps').onclick = () => showTab('maps');
 $('t-cmp').onclick = () => showTab('cmp');
 
-$('q').oninput = e => { S.q = e.target.value; S.limit = 48; renderOverall(); };
-$('cls').onchange = e => { S.cls = e.target.value; S.limit = 48; renderOverall(); };
+$('q').oninput = e => { S.q = e.target.value; S.limit = 48; S.page = 1; renderOverall(); };
+$('cls').onchange = e => { S.cls = e.target.value; S.limit = 48; S.page = 1; renderOverall(); };
 $('tgl').onclick = () => {
   S.times = !S.times;
   $('tgl').setAttribute('aria-pressed', S.times);
@@ -477,7 +668,32 @@ $('tgl').onclick = () => {
   renderOverall();
 };
 $('more').onclick = () => { S.limit += 48; renderOverall(); };
-$('list').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
+$('list').onclick = e => {
+  const th = e.target.closest('th[data-k]');
+  if (th) {
+    const k = th.dataset.k;
+    if (S.sortKey === k) S.sortDir *= -1; else { S.sortKey = k; S.sortDir = 1; }
+    S.page = 1;
+    return renderOverall();
+  }
+  const pg = e.target.closest('[data-p]');
+  if (pg) {
+    const a = pg.dataset.p;
+    S.page = a === 'first' ? 1 : a === 'prev' ? S.page - 1 : a === 'next' ? S.page + 1 : S.pages;
+    return renderOverall();
+  }
+  const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r);
+};
+$('list').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('th[data-k]')) e.target.click(); };
+function setView(v) {
+  S.view = v;
+  try { localStorage.setItem('view', v); } catch (e) {}
+  document.querySelectorAll('#seg [data-v]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+  $('v-overall').classList.toggle('tbl', v === 'table');
+  S.page = 1; updateLegend();
+  renderOverall();
+}
+$('seg').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setView(b.dataset.v); };
 $('maplist').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
 $('chips').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { S.map = b.dataset.m; renderMap(); } };
 $('ca').oninput = renderCompare; $('cb').oninput = renderCompare;
@@ -490,6 +706,12 @@ $('dlg').onclick = e => {
   }
 };
 
+$('themebtn').onclick = () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  updateThemeBtn();
+};
 $('langbtn').onclick = e => {
   e.stopPropagation();
   const open = $('langmenu').hidden;
@@ -506,7 +728,10 @@ $('langmenu').onclick = e => {
 document.addEventListener('click', () => { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('langmenu').hidden = true; $('langbtn').setAttribute('aria-expanded', 'false'); } });
 
+try { const v = localStorage.getItem('view'); if (v === 'cards' || v === 'table') S.view = v; } catch (e) {}
 applyStatic();
+document.querySelectorAll('#seg [data-v]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === S.view));
+$('v-overall').classList.toggle('tbl', S.view === 'table');
 load();
 </script>
 </body>
