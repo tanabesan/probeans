@@ -27,8 +27,11 @@ button{font:inherit; color:inherit; cursor:pointer}
 /* ---- ヘッダー ---- */
 .top{position:relative; text-align:center}
 .top{padding:64px 20px 44px; border-radius:14px; background:
-  linear-gradient(color-mix(in srgb,var(--bg) 62%,transparent),color-mix(in srgb,var(--bg) 78%,transparent)),
-  url("https://tanabesan.github.io/probeans/ui/probeans.webp") center/cover no-repeat, var(--soft)}
+  linear-gradient(rgba(13,16,20,.62),rgba(13,16,20,.78)),
+  url("https://tanabesan.github.io/probeans/ui/probeans.webp") center/cover no-repeat, #161A20}
+.top h1{color:#E8EBF0}
+.top h1 mark{color:#7C9BFF}
+.top .sub{color:#B4BCC8}
 h1{margin:0; font-family:var(--f-disp); font-weight:700; font-size:clamp(38px,7vw,68px); line-height:1; letter-spacing:.02em; text-transform:uppercase}
 h1 mark{background:none; color:var(--accent); font-weight:500}
 .sub{margin:14px 0 0; font-size:clamp(13px,1.8vw,15px); color:var(--muted); letter-spacing:.02em}
@@ -162,6 +165,15 @@ button.mrow:hover{background:var(--soft)}
 .mrow .k{text-align:center; font-family:var(--f-disp); font-weight:700; font-size:20px; color:var(--muted)}
 .mrow.wr{background:var(--wr-bg); margin-bottom:6px; color:var(--wr-ink); border-bottom:0}
 .mrow.wr .k{color:var(--wr-ink)}
+.sustag{display:inline-block; vertical-align:middle; background:#B45309; color:#fff; border-radius:4px; padding:0 7px; margin-left:6px; font-size:11px; font-weight:700; line-height:1.65; white-space:nowrap; letter-spacing:.02em}
+.mrow.sus,button.mrow.sus:hover{background:#FFF1DB}
+button.mrow.sus:hover{background:#FFE6C2}
+.susnote{display:flex; gap:10px; align-items:flex-start; margin:0 6px 8px; padding:10px 14px; border-radius:8px; border-left:4px solid #D9730D; background:#FFF1DB; color:#5A3200; font-size:13px; line-height:1.6}
+.susnote b{flex:none}
+html[data-theme=dark] .mrow.sus,html[data-theme=dark] button.mrow.sus:hover{background:rgba(255,138,76,.13)}
+html[data-theme=dark] button.mrow.sus:hover{background:rgba(255,138,76,.22)}
+html[data-theme=dark] .susnote{background:rgba(255,138,76,.13); color:#FFD9B8}
+html[data-theme=dark] .sustag{background:#D9730D}
 
 /* ---- 比較 ---- */
 .pick{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px}
@@ -450,6 +462,7 @@ const EPS = 0.0005;
 const I18N = {
   en: {
     sub: 'Total-time ranking across all 27 LOLBeans maps',
+    sus_tag: 'Unverified', sus_note: 'Some times on this map are faster than the world record. They may be unverified or falsified, so please treat them with caution. World records must be verified.',
     menu: 'Menu', menu_theme: 'Appearance', menu_lang: 'Language', theme_light_name: 'Light', theme_dark_name: 'Dark',
     tab_about: 'About',
     tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
@@ -474,6 +487,7 @@ const I18N = {
   },
   ja: {
     sub: 'LOLBeans 全27マップの合計タイムランキング',
+    sus_tag: '未検証', sus_note: 'このマップには、世界記録より速いタイムがあります。未検証、または偽造の可能性があるため、ご注意ください。世界記録はすべて検証が必要です。',
     menu: 'メニュー', menu_theme: '表示モード', menu_lang: '言語', theme_light_name: 'ライト', theme_dark_name: 'ダーク',
     tab_about: 'このサイトについて',
     tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
@@ -531,6 +545,7 @@ const ABOUT = {
       'Table view colors each time by how far it is from the WR on that map.',
       'In table view, click a map name at the top of a column to sort by that map (fastest first). Click it again to reverse the order.',
       'If a map has no time entered, 60 seconds are added to the total score for that map.',
+      'On the By map tab, a time faster than the world record is marked ⚠ Unverified. It may be unverified or falsified, so treat it with caution.',
       'Click a player to see their WR maps, biggest gaps to WR and best map rankings.'
     ],
     note: 'The data on this site is read from the spreadsheet, so it may differ slightly from the sheet until the next refresh.',
@@ -553,6 +568,7 @@ const ABOUT = {
       '表表示の色は、そのマップのWRからどれだけ離れているかを表します。',
       '表表示では、表の上にあるコース名を押すと、そのコースの速い順に並べ替えられます。もう一度押すと順番が逆になります。',
       'タイムが未記入のコースがある場合は、そのコースに60秒が加算されて合計が計算されます。',
+      'マップ別タブで、世界記録より速いタイムには ⚠ 未検証 の印が付きます。未検証、または偽造の可能性があるため、ご注意ください。',
       'プレイヤーをクリックすると、WR保持マップ、WRとの差が大きいマップ、順位が高いマップが見られます。'
     ],
     note: 'このサイトのデータはスプレッドシートから読み込んでいるため、次の更新まではシートと少し違う場合があります。',
@@ -778,13 +794,15 @@ function renderMap() {
   const base = wt != null ? wt : (list[0] ? list[0].courses[m] : 0);
   const span = list.length ? Math.max(list[list.length - 1].courses[m] - base, 0.001) : 1;
   const hero = thumbUrl(m) ? `<div class="mhero">${thumbImg(m)}<div class="cap"><h2>${esc(m)}</h2><span class="wrn">${wt != null ? 'WR ' + fmt(wt) : ''}</span></div></div>` : '';
-  let html = hero + (wt != null ? `<div class="mrow wr"><span class="k">WR</span><span class="n">${esc(T('wr_name'))}</span><span class="t">${fmt(wt)}</span><span class="g"></span></div>` : '');
+  const hasSus = wt != null && list.some(p => p.courses[m] < wt - EPS);
+  let html = hero + (hasSus ? `<div class="susnote"><b>⚠</b><span>${esc(T('sus_note'))}</span></div>` : '') + (wt != null ? `<div class="mrow wr"><span class="k">WR</span><span class="n">${esc(T('wr_name'))}</span><span class="t">${fmt(wt)}</span><span class="g"></span></div>` : '');
   let prev = null, rk = 0;
   html += list.map((p, i) => {
     const t = p.courses[m];
     if (prev === null || t > prev + 1e-9) rk = i + 1; prev = t;
     const w = Math.min(100, ((t - base) / span) * 100);
-    return `<button class="mrow" data-r="${p.rank}"><span class="k">${rk}</span><span class="n">${esc(p.name)}${wt != null && Math.abs(t - wt) < EPS ? ' <span class="wrtag">WR</span>' : ''}</span>` +
+    const sus = wt != null && t < wt - EPS;
+    return `<button class="mrow${sus ? ' sus' : ''}" data-r="${p.rank}"><span class="k">${rk}</span><span class="n">${esc(p.name)}${wt != null && Math.abs(t - wt) < EPS ? ' <span class="wrtag">WR</span>' : ''}${sus ? `<span class="sustag" title="${esc(T('sus_note'))}">⚠ ${esc(T('sus_tag'))}</span>` : ''}</span>` +
       `<span class="t">${fmt(t)}</span><span class="g">${wt != null ? sgn(t - wt) : ''}</span>` +
       `<span class="bar" style="width:${w.toFixed(1)}%"></span></button>`;
   }).join('');
