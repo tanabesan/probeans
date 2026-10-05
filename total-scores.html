@@ -61,6 +61,16 @@ h1 mark{background:none; color:var(--accent); font-weight:500}
 .opts button[aria-checked=true]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
 .opts button[aria-checked=true]::after{content:"✓"; margin-left:auto; font-weight:700}
 html.menu-open{overflow:hidden}
+.shnote{margin:10px 2px 0; font-size:12px; line-height:1.6; color:var(--muted)}
+.toast{white-space:nowrap; position:fixed; inset:auto auto 28px 50%; margin:0; border:0; z-index:200; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#1F9D55; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:700; box-shadow:0 10px 30px rgba(15,20,25,.35); transition:opacity .2s, transform .2s; max-width:90vw; text-align:center; overflow:visible}
+.toast.err{background:#C0392B}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+.opts button.copied,.dact button.copied{background:#1F9D55 !important; border-color:#1F9D55 !important; color:#fff !important}
+.opts button.copied::after{content:none !important}
+.dact{flex-wrap:wrap}
+.dact .sec{background:transparent; color:var(--ink); border:1px solid var(--line-strong)}
+.dact .sec:hover{background:var(--soft); border-color:var(--ink)}
+html[data-theme=dark] .dact .sec{color:var(--ink)}
 
 /* ---- タブ (下線) ---- */
 .tabs{display:flex; justify-content:safe center; gap:6px; margin:34px auto 26px; border-bottom:1px solid var(--line); width:100%; overflow-x:auto; padding-bottom:1px; scrollbar-width:none; -webkit-overflow-scrolling:touch}
@@ -221,7 +231,49 @@ dialog::backdrop{background:rgba(15,20,25,.5)}
 .drow.iswr{background:var(--wr-bg); color:var(--wr); border-radius:6px; margin-bottom:4px; border-bottom:0}
 .drow.iswr .mn small,.drow.iswr .g{color:var(--wr)}
 .wrlist{margin:10px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center}
-.drow .gb{position:absolute; left:10px; bottom:-1px; height:2px; background:var(--orange)}
+.drow .gb{position:absolute; left:10px; bottom:-1px; height:2px; background:var(--orange); max-width:calc(100% - 20px)}
+/* プレイヤー詳細: 全画面表示 */
+#dlg{width:100vw; max-width:none; height:100dvh; max-height:none; margin:0; inset:0; border-radius:0; box-shadow:none; background:var(--bg)}
+#dlg .dh{padding:20px max(20px, calc((100% - 1240px) / 2)) 16px}
+#dlg .dh h2{padding-right:0; font-size:clamp(28px,5vw,44px)}
+#dlg .db{padding:4px max(14px, calc((100% - 1240px) / 2)) 40px}
+.back{display:inline-flex; align-items:center; gap:6px; margin:0 0 12px; padding:7px 14px; border:1px solid var(--line-strong); background:var(--panel); border-radius:8px; font-weight:600; font-size:13px}
+.back:hover{border-color:var(--ink)}
+.dh.hold .back{background:rgba(255,255,255,.7)}
+html[data-theme=dark] .dh.hold .back{background:rgba(0,0,0,.3)}
+html:has(#dlg[open]){overflow:hidden}
+#dlg .dcol{min-width:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(min(380px,100%),1fr)); column-gap:24px; align-content:start}
+#dlg .dcol[hidden]{display:none}
+#dlg .dcol[data-v=sim]{grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr))}
+#dlg .dcol>h3,#dlg .dcol>.simintro,#dlg .dcol>.simhead,#dlg .dcol>.simbar,#dlg .dcol>.drow.full{grid-column:1/-1}
+.dtabs{display:flex; gap:4px; margin:14px 0 -16px; overflow-x:auto; scrollbar-width:none}
+.dtabs::-webkit-scrollbar{display:none}
+.dtabs button{flex:none; border:0; background:transparent; padding:11px 18px; font-weight:600; font-size:14px; color:var(--muted); position:relative; white-space:nowrap}
+.dtabs button:hover{color:var(--ink)}
+.dtabs button[aria-selected=true]{color:var(--ink)}
+.dtabs button[aria-selected=true]::after{content:""; position:absolute; left:8px; right:8px; bottom:0; height:3px; background:var(--accent); border-radius:3px 3px 0 0}
+/* もしもシミュレーター */
+.simintro{margin:0 10px 8px; font-size:12px; line-height:1.6; color:var(--muted)}
+.simhead{display:flex; justify-content:flex-end; margin:0 10px 4px}
+.simhead button{border:1px solid var(--line-strong); background:transparent; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:600}
+.simhead button:hover{border-color:var(--ink)}
+.simrow{display:grid; grid-template-columns:minmax(0,1fr) 64px 132px; gap:8px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--line)}
+.simrow .mn{font-weight:600; font-size:13px; min-width:0}
+.simrow .mn small{display:block; font-weight:500; font-size:11px; color:var(--muted); min-height:15px}
+.simrow .mn small.up{color:#1F9D55; font-weight:700}
+.simrow .mn small.wrnew{color:#B45309; font-weight:700}
+.simrow .t{text-align:right; font-family:var(--f-num); font-size:13px; letter-spacing:-.03em}
+.simrow .t.none{color:var(--muted); font-size:11px; letter-spacing:0}
+.simin{display:flex; gap:4px}
+.simin input{width:84px; padding:6px 8px; font-family:var(--f-num); font-size:13px}
+.simin button{border:1px solid var(--wr-bg); background:var(--wr-bg); color:var(--wr); border-radius:5px; padding:0 8px; font-size:11px; font-weight:700}
+.simin button:hover{filter:brightness(1.25)}
+.simbar{position:sticky; bottom:8px; z-index:4; margin:14px 4px 0; padding:12px 16px; border-radius:10px; background:var(--ink); color:var(--bg); box-shadow:0 8px 24px rgba(15,20,25,.35); display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline; justify-content:space-between}
+.simbar[hidden]{display:none}
+.simbar .big{font-family:var(--f-disp); font-weight:700; font-size:22px; letter-spacing:.01em}
+.simbar .sm{font-family:var(--f-num); font-size:12px; opacity:.85}
+.simbar .upc{color:#5BEE8C} .simbar .dnc{color:#FF8A8A}
+html[data-theme=dark] .simbar .upc{color:#1F9D55} html[data-theme=dark] .simbar .dnc{color:#C0392B}
 
 .seg{display:inline-flex; border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; background:#fff}
 .seg button{border:0; background:transparent; padding:7px 14px; font-size:13px; font-weight:600; color:var(--muted)}
@@ -367,13 +419,19 @@ html[data-theme=dark] .scrim{background:rgba(0,0,0,.65)}
   .vs{font-size:18px; padding:10px 8px 2px}
   .vs>div{min-width:0; overflow-wrap:anywhere}
   .crow{padding:4px 6px}
-  dialog{width:96vw; max-height:92dvh; border-radius:10px}
-  .dh{padding:18px 16px 12px}
-  .dh h2{font-size:24px; padding-right:40px}
-  .x{right:12px; top:12px}
-  .db{padding:2px 6px 18px}
+  #dlg .dh{padding:14px 16px 12px}
+  #dlg .dh h2{font-size:26px}
+  #dlg .db{padding:2px 6px 40px}
+  .back{margin-bottom:8px; padding:6px 12px}
+  .dtabs{margin-bottom:-12px}
+  .dtabs button{padding:10px 14px; font-size:13px}
   .drow{grid-template-columns:minmax(0,1fr) 72px 56px; gap:6px; padding:8px 6px}
   .drow.hasth{grid-template-columns:44px minmax(0,1fr) 72px 56px}
+  .dact{flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-top:10px}
+  .dact::-webkit-scrollbar{display:none}
+  .dact button{flex:none; white-space:nowrap; padding:7px 12px; font-size:12px}
+  .simrow{grid-template-columns:minmax(0,1fr) 54px 118px; gap:6px; padding:8px 6px}
+  .simin input{width:72px}
   .thsm{width:44px; height:25px}
   .about{padding:6px 16px 18px}
   .about h2{font-size:21px}
@@ -461,7 +519,11 @@ html[data-theme=dark] .scrim{background:rgba(0,0,0,.65)}
       <button type="button" role="radio" data-l="en"><span class="ic">🌐</span><span>English</span></button>
       <button type="button" role="radio" data-l="ja"><span class="ic">🌐</span><span>日本語</span></button>
     </div></div>
+  <div class="dsec"><h3 data-i18n="menu_share"></h3>
+    <div class="opts"><button type="button" id="sharebtn"><span class="ic">🔗</span><span data-i18n="copy_page_link"></span></button></div>
+    <p class="shnote" data-i18n="share_note"></p></div>
 </aside>
+<div class="toast" id="toast" popover="manual" role="status" aria-live="polite"></div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxJunGL8SSr1lI6Cb4DezG9q98l-Lt2EbFoZjIrwlZa2imRKseKqkiaJ3JCzKhqv2BL-w/exec';
@@ -487,6 +549,14 @@ const I18N = {
     sus_tag: 'Unverified', sus_note: 'Some times on this map are faster than the world record. They may be unverified or falsified, so please treat them with caution. World records must be verified.',
     err_bad: 'The server returned a web page instead of data. Please try again in a moment.', retry: 'Retry',
     stale: t => `Could not fetch the latest data, so the copy saved on ${t} is shown.`,
+    back: 'Back', dv_rec: 'Records',
+    sim_title: 'What-if simulator', sim_goto: 'What-if simulator', sim_reset: 'Reset',
+    sim_intro: 'Enter a target time for any map to see how your total and overall rank would change. Maps with no time are counted as +60s in your total.',
+    sim_none: 'None (+60s)', sim_wr_btn: 'WR', sim_wr_title: 'Fill in the world record',
+    sim_new_wr: 'Faster than WR!', sim_tie_wr: 'Ties the WR', sim_maprank: (a, b) => `Map rank ${a} → ${b}`,
+    sim_faster: s => `${s}s faster`, sim_slower: s => `${s}s slower`, sim_overall: 'Overall rank', sim_total: 'Total',
+    menu_share: 'Share', copy_page_link: 'Copy link to this page', share_note: 'The link reopens exactly what you are viewing: the tab, map, player or comparison.',
+    copy_player_link: 'Copy link to this player', link_copied: 'Copied', link_toast: 'Link copied', link_failed_short: 'Failed', link_failed: 'Could not copy. Copy the address bar instead.',
     menu: 'Menu', menu_theme: 'Appearance', menu_lang: 'Language', theme_light_name: 'Light', theme_dark_name: 'Dark',
     tab_about: 'About',
     tab_overall: 'Overall', tab_maps: 'By map', tab_cmp: 'Compare players',
@@ -514,6 +584,14 @@ const I18N = {
     sus_tag: '未検証', sus_note: 'このマップには、世界記録より速いタイムがあります。未検証、または偽造の可能性があるため、ご注意ください。世界記録はすべて検証が必要です。',
     err_bad: 'サーバーからデータではなくWebページが返されました。少し待ってから、もう一度お試しください。', retry: '再読み込み',
     stale: t => `最新のデータを取得できなかったため、${t} に保存したデータを表示しています。`,
+    back: '戻る', dv_rec: '記録',
+    sim_title: 'もしもシミュレーター', sim_goto: 'もしもシミュレーター', sim_reset: 'リセット',
+    sim_intro: 'マップごとに目標タイムを入れると、合計と総合順位がどう変わるかを計算します。タイムがないマップは、合計に+60秒されている前提で計算します。',
+    sim_none: '未登録 (+60秒)', sim_wr_btn: 'WR', sim_wr_title: '世界記録のタイムを入れる',
+    sim_new_wr: 'WRより速い！', sim_tie_wr: 'WRと同タイム', sim_maprank: (a, b) => `マップ内 ${a} → ${b}`,
+    sim_faster: s => `${s}秒短縮`, sim_slower: s => `${s}秒遅くなる`, sim_overall: '総合順位', sim_total: '合計',
+    menu_share: '共有', copy_page_link: 'このページのリンクをコピー', share_note: '今見ているタブ、マップ、プレイヤー、比較の状態をそのまま開けるリンクです。',
+    copy_player_link: 'この人へのリンクをコピー', link_copied: 'コピーしました', link_toast: 'リンクをコピーしました', link_failed_short: '失敗', link_failed: 'コピーできませんでした。アドレスバーのURLをコピーしてください。',
     menu: 'メニュー', menu_theme: '表示モード', menu_lang: '言語', theme_light_name: 'ライト', theme_dark_name: 'ダーク',
     tab_about: 'このサイトについて',
     tab_overall: '総合ランキング', tab_maps: 'マップ別', tab_cmp: '2人を比較',
@@ -719,6 +797,9 @@ async function load() {
   }).join('');
 
   applyLang();
+  applyUrlState();
+  URL_READY = true;
+  syncUrl();
 }
 
 /* ---- 共通ヘルパー ---- */
@@ -917,24 +998,90 @@ function openPlayer(rank) {
   const rk = x => `<small>${esc(T('map_rank', x.r, N[x.m]))}</small>`;
   const dth = m => thumbImg(m, 'thsm');
   const dcls = m => thumbUrl(m) ? ' hasth' : '';
+  // シミュレーター対象: 未登録のマップ (+60秒) → WRとの差が大きい順
+  const simRows = [
+    ...missing.map(m => ({ m, t: null })),
+    ...items.filter(x => !(x.g != null && x.g < EPS)).sort((a, b) => (b.g ?? -1) - (a.g ?? -1))
+  ];
+  CUR_P = p; SIM_ROWS = simRows;
+  const simHtml = simRows.length ? `<h3 id="simsec">${esc(T('sim_title'))}</h3>
+      <p class="simintro">${esc(T('sim_intro'))}</p>
+      <div class="simhead"><button type="button" data-simreset>${esc(T('sim_reset'))}</button></div>` +
+    simRows.map(x => `<div class="simrow" data-sm="${esc(x.m)}"><div class="mn">${esc(x.m)}<small class="simres"></small></div>
+        ${x.t != null ? `<span class="t">${fmt(x.t)}</span>` : `<span class="t none">${esc(T('sim_none'))}</span>`}
+        <div class="simin"><input class="siminput" type="number" inputmode="decimal" step="0.001" min="0" placeholder="${x.t != null ? fmt(x.t) : ''}" aria-label="${esc(x.m)}">
+        ${wr && wr.courses[x.m] != null ? `<button type="button" class="simwr" data-simwr="${wr.courses[x.m]}" title="${esc(T('sim_wr_title'))}">${esc(T('sim_wr_btn'))}</button>` : ''}</div></div>`).join('') +
+    `<div class="simbar" id="simbar" hidden></div>` : '';
   $('dlg').innerHTML = `
-    <div class="dh${holds.length ? ' hold' : ''}"><button class="x" data-close aria-label="${esc(T('close'))}">×</button>
+    <div class="dh${holds.length ? ' hold' : ''}"><button class="back" data-close type="button" aria-label="${esc(T('close'))}">← ${esc(T('back'))}</button>
       <h2>${esc(p.name)} ${badge(p.class)}</h2>
       <p class="meta">${T('overall')} <b>${T('rank_ord', p.rank)}</b> · ${T('total')} <b>${fmt(p.score)}</b>${wr ? ' · ' + T('wr_gap') + ' <b>' + sgn(p.score - wr.score) + '</b>' : ''}</p>
       ${holds.length ? `<div class="wrlist"><span class="wrtag">${T('wr_hold_n', holds.length)}</span>${holds.map(x => `<span class="wrtag">${esc(x.m)}</span>`).join('')}</div>` : ''}
       ${top ? `<p class="meta">${T('biggest_gap', esc(top.m), sgn(top.g))}</p>` : ''}
-      <div class="dact"><button data-cmp="${esc(p.name)}">${T('cmp_btn')}</button></div></div>
-    <div class="db">
+      <div class="dact"><button data-cmp="${esc(p.name)}">${T('cmp_btn')}</button><button class="sec" data-share>${T('copy_player_link')}</button></div>
+      ${simRows.length ? `<div class="dtabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-dv="rec">📋 ${esc(T('dv_rec'))}</button><button type="button" role="tab" aria-selected="false" data-dv="sim">🎯 ${esc(T('sim_goto'))}</button></div>` : ''}</div>
+    <div class="db"><div class="dcol" data-v="rec">
       ${holds.length ? `<h3>${T('sec_wr')}</h3>` + holds.map(x => `<div class="drow iswr${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}${rk(x)}</div>
         <span class="t">${fmt(x.t)}</span><span class="g">WR</span></div>`).join('') : ''}
       ${withGap.length ? `<h3>${T('sec_gap')}</h3>` + withGap.map(x => `<div class="drow${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}${rk(x)}</div>
         <span class="t">${fmt(x.t)}</span><span class="g">${sgn(x.g)}</span>
         <span class="gb" style="width:${(x.g / maxG * 100).toFixed(1)}%"></span></div>`).join('') : ''}
       ${best.length ? `<h3>${T('sec_best')}</h3>` + best.map(x => `<div class="drow${dcls(x.m)}">${dth(x.m)}<div class="mn">${esc(x.m)}</div><span class="t">${fmt(x.t)}</span><span class="g">${T('rank_short', x.r)}</span></div>`).join('') : ''}
-      ${missing.length ? `<h3>${T('sec_missing')}</h3><div class="drow"><div class="mn">${missing.map(esc).join(' / ')}</div></div>` : ''}
+      ${missing.length ? `<h3>${T('sec_missing')}</h3><div class="drow full"><div class="mn">${missing.map(esc).join(' / ')}</div></div>` : ''}
+      </div><div class="dcol" data-v="sim" hidden>${simHtml}</div>
     </div>`;
-  const d = $('dlg'); if (!d.open) d.showModal(); d.scrollTop = 0;
+  const d = $('dlg'), wasOpen = d.open; if (!wasOpen) d.showModal(); d.scrollTop = 0;
+  CUR_PLAYER = p.name; CUR_DV = 'rec';
+  // 開くたびに履歴を1つ積む → ブラウザ/スマホの「戻る」で一覧に戻れる (共有URLから直接開いたときは積まない)
+  if (!wasOpen && URL_READY) { try { history.pushState({ pl: 1 }, '', buildUrl()); } catch (e) { syncUrl(); } } else syncUrl();
 }
+
+/* ---- もしもシミュレーター ---- */
+let CUR_P = null, SIM_ROWS = [], CUR_DV = 'rec';
+function switchDV(v) {
+  if (v === 'sim' && !document.querySelector('#dlg [data-v="sim"]')) v = 'rec';
+  CUR_DV = v;
+  document.querySelectorAll('#dlg [data-v]').forEach(c => c.hidden = c.dataset.v !== v);
+  document.querySelectorAll('#dlg [data-dv]').forEach(b => b.setAttribute('aria-selected', b.dataset.dv === v));
+  $('dlg').scrollTop = 0;
+  if (v === 'sim') updateSim();
+  syncUrl();
+}
+const simOthersBelow = (m, t, own) => { // 他の人で、タイムが t より速い人数
+  let n = 0; for (const v of sorted[m]) if (v < t - 1e-9) n++;
+  if (own != null && own < t - 1e-9) n--; // 自分の今のタイムは数えない
+  return n;
+};
+function updateSim() {
+  const p = CUR_P; if (!p) return;
+  const bar = $('simbar'); let delta = 0, changed = 0;
+  document.querySelectorAll('#dlg .simrow').forEach(row => {
+    const m = row.dataset.sm, res = row.querySelector('.simres');
+    const v = parseFloat(row.querySelector('.siminput').value);
+    res.className = 'simres'; res.textContent = '';
+    if (!(v > 0)) return;
+    const own = p.courses[m] != null ? p.courses[m] : null;
+    delta += v - (own != null ? own : 60); changed++;
+    const oldTxt = own != null ? T('rank_short', mapRank(m, own)) : '–';
+    const newR = simOthersBelow(m, v, own) + 1;
+    res.textContent = T('sim_maprank', oldTxt, T('rank_short', newR));
+    const w = wr ? wr.courses[m] : null;
+    if (w != null && v < w - EPS) { res.textContent += ' · ⚠ ' + T('sim_new_wr'); res.classList.add('wrnew'); }
+    else if (w != null && Math.abs(v - w) < EPS) { res.textContent += ' · 🏆 ' + T('sim_tie_wr'); res.classList.add('up'); }
+    else if (own != null ? v < own - 1e-9 : true) res.classList.add('up');
+  });
+  if (!changed) { bar.hidden = true; return; }
+  const newScore = p.score + delta;
+  const before = players.reduce((n, q) => n + (q !== p && q.score < p.score - 1e-9 ? 1 : 0), 1);
+  const after = players.reduce((n, q) => n + (q !== p && q.score < newScore - 1e-9 ? 1 : 0), 1);
+  const d = after - before, cls = d < 0 ? 'upc' : d > 0 ? 'dnc' : '';
+  const arrow = d < 0 ? `▲${-d}` : d > 0 ? `▼${d}` : '±0';
+  const faster = delta <= 0 ? T('sim_faster', fmt(-delta)) : T('sim_slower', fmt(delta));
+  bar.innerHTML = `<span><span class="sm">${esc(T('sim_overall'))}</span> <span class="big">${esc(T('rank_ord', before))} → ${esc(T('rank_ord', after))}</span> <span class="big ${cls}">${arrow}</span></span>
+    <span class="sm">${esc(T('sim_total'))} ${fmt(p.score)} → <b>${fmt(newScore)}</b> (${esc(faster)})</span>`;
+  bar.hidden = false;
+}
+$('dlg').addEventListener('input', e => { if (e.target.closest('.siminput')) updateSim(); });
 
 /* ---- イベント ---- */
 function showTab(id) {
@@ -942,6 +1089,7 @@ function showTab(id) {
     $('v-' + t).hidden = t !== id;
     $('t-' + t).setAttribute('aria-selected', t === id);
   });
+  CUR_TAB = id; syncUrl();
 }
 $('t-overall').onclick = () => showTab('overall');
 $('t-maps').onclick = () => showTab('maps');
@@ -986,7 +1134,7 @@ $('seg').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setView
 $('maplist').onclick = e => { const b = e.target.closest('[data-r]'); if (b) openPlayer(+b.dataset.r); };
 $('chips').onclick = e => {
   const b = e.target.closest('[data-m]');
-  if (b) { S.map = b.dataset.m; renderMap(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
+  if (b) { S.map = b.dataset.m; renderMap(); syncUrl(); b.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
 };
 // マウスホイールの縦回転で横スクロール
 $('chips').addEventListener('wheel', e => {
@@ -994,15 +1142,101 @@ $('chips').addEventListener('wheel', e => {
   if (c.scrollWidth <= c.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
   e.preventDefault(); c.scrollLeft += e.deltaY;
 }, { passive: false });
-$('ca').oninput = renderCompare; $('cb').oninput = renderCompare;
+$('ca').oninput = () => { renderCompare(); syncUrl(); }; $('cb').oninput = () => { renderCompare(); syncUrl(); };
 $('dlg').onclick = e => {
   if (e.target === $('dlg') || e.target.closest('[data-close]')) return $('dlg').close();
+  const sh = e.target.closest('[data-share]'); if (sh) return copyLink(sh);
+  const tb = e.target.closest('[data-dv]'); if (tb) return switchDV(tb.dataset.dv);
+  const wb = e.target.closest('[data-simwr]');
+  if (wb) { const i = wb.closest('.simrow').querySelector('.siminput'); i.value = wb.dataset.simwr; updateSim(); return; }
+  if (e.target.closest('[data-simreset]')) { document.querySelectorAll('#dlg .siminput').forEach(i => i.value = ''); updateSim(); return; }
   const c = e.target.closest('[data-cmp]');
   if (c) {
     $('ca').value = c.dataset.cmp; $('cb').value = ''; $('dlg').close();
     showTab('cmp'); renderCompare(); $('cb').focus();
   }
 };
+
+$('dlg').addEventListener('close', () => {
+  CUR_PLAYER = null;
+  if (history.state && history.state.pl) { try { history.back(); return; } catch (e) {} }
+  syncUrl();
+});
+window.addEventListener('popstate', () => { const d = $('dlg'); if (d.open) d.close(); syncUrl(); });
+
+/* ---- 共有用URL ---- */
+// ?tab=maps|compare|about  &map=コース名  &player=名前  &a=名前&b=名前
+let CUR_TAB = 'overall', CUR_PLAYER = null, URL_READY = false;
+const TAB_PARAM = { overall: null, maps: 'maps', cmp: 'compare', about: 'about' };
+function buildUrl() {
+  const u = new URL(location.href);
+  ['tab', 'map', 'player', 'view', 'a', 'b'].forEach(k => u.searchParams.delete(k));
+  const tp = TAB_PARAM[CUR_TAB]; if (tp) u.searchParams.set('tab', tp);
+  if (CUR_TAB === 'maps' && S.map) u.searchParams.set('map', S.map);
+  if (CUR_TAB === 'cmp') {
+    const a = byName($('ca').value), b = byName($('cb').value);
+    if (a) u.searchParams.set('a', a.name);
+    if (b) u.searchParams.set('b', b.name);
+  }
+  if (CUR_PLAYER) { u.searchParams.set('player', CUR_PLAYER); if (CUR_DV === 'sim') u.searchParams.set('view', 'sim'); }
+  return u.toString();
+}
+function syncUrl() {
+  if (!URL_READY || !players) return; // 読み込み・復元が終わるまで触らない
+  try { history.replaceState(null, '', buildUrl()); } catch (e) {}
+}
+function applyUrlState() {
+  const q = new URLSearchParams(location.search);
+  const tab = q.get('tab');
+  const id = tab === 'maps' ? 'maps' : tab === 'compare' ? 'cmp' : tab === 'about' ? 'about' : 'overall';
+  const map = q.get('map');
+  if (map) { const m = maps.find(x => x.toLowerCase() === map.toLowerCase()); if (m) { S.map = m; renderMap(); } }
+  const a = q.get('a') && byName(q.get('a')), b = q.get('b') && byName(q.get('b'));
+  if (a) $('ca').value = a.name;
+  if (b) $('cb').value = b.name;
+  if (a || b) renderCompare();
+  showTab(map && id === 'overall' ? 'maps' : (a || b) && id === 'overall' ? 'cmp' : id);
+  const pn = q.get('player'), pl = pn && byName(pn);
+  if (pl) { openPlayer(pl.rank); if (q.get('view') === 'sim') switchDV('sim'); }
+}
+let toastT, toastH;
+function toast(msg, bad) {
+  const t = $('toast'); t.textContent = '✓ ' + msg; if (bad) t.textContent = '⚠ ' + msg;
+  t.classList.toggle('err', !!bad);
+  // popover = 最前面(top layer)に出すので、ダイアログやメニューが開いていても隠れない
+  try { if (t.showPopover && !t.matches(':popover-open')) t.showPopover(); } catch (e) {}
+  clearTimeout(toastH);
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(toastT);
+  toastT = setTimeout(() => {
+    t.classList.remove('show');
+    toastH = setTimeout(() => { try { if (t.hidePopover && t.matches(':popover-open')) t.hidePopover(); } catch (e) {} }, 250);
+  }, 2400);
+}
+// 押したボタン自体も「コピーしました」に変える
+function flashButton(btn, ok) {
+  if (!btn) return;
+  const label = btn.querySelector('span:not(.ic)') || btn;
+  if (btn._orig === undefined) btn._orig = label.textContent;
+  label.textContent = '✓ ' + T(ok ? 'link_copied' : 'link_failed_short');
+  btn.classList.toggle('copied', ok);
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => { label.textContent = btn._orig; btn.classList.remove('copied'); btn._orig = undefined; }, 2000);
+}
+async function copyLink(btn) {
+  const url = buildUrl();
+  let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
+  if (!ok) { // 古いブラウザ・非HTTPS用の代替
+    try {
+      const ta = document.createElement('textarea'); ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+    } catch (e) {}
+  }
+  toast(T(ok ? 'link_toast' : 'link_failed'), !ok);
+  if (ok) flashButton(btn, true);
+}
+$('sharebtn').onclick = e => copyLink(e.currentTarget);
 
 /* ---- 右メニュー (ハンバーガー) ---- */
 function setMenu(open) {
