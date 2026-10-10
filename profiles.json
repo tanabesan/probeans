@@ -12,5 +12,10 @@
     "icon": "https://tanabesan.github.io/probeans/ui/icon/nekoke.jpg",
     "header": "https://tanabesan.github.io/probeans/ui/header/nekoke.png",
     "youtube": "https://youtube.com/channel/UCzuYu-USX2BaI3T2mCHSo0Q?si=21YlBpX3wZ0kBsMM"
+  },
+  "枕草子(Macra)": {
+    "icon": "ui/icons/macra-mv1wad7x.webp",
+    "header": "ui/headers/macra-mv1waj39.webp",
+    "youtube": "@Mac_Lahr"
   }
 }
